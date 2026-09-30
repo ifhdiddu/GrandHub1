@@ -1,0 +1,390 @@
+local plr=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local TS=game:GetService("TweenService")
+local RS=game:GetService("ReplicatedStorage")
+local pg=plr:WaitForChild("PlayerGui")
+
+local sg=Instance.new("ScreenGui")
+sg.Name="GravityHub"
+sg.ResetOnSpawn=false
+sg.Parent=pg
+
+local autoFarm=false
+local autoFruit=false
+local autoUnlock=false
+local killCount=0
+local missao=nil
+local ultimaTent=0
+
+local win=Instance.new("Frame")
+win.Size=UDim2.new(0,420,0,300)
+win.Position=UDim2.new(0.5,-210,0.5,-150)
+win.BackgroundColor3=Color3.fromRGB(22,22,28)
+win.BorderSizePixel=0
+win.Active=true
+win.Parent=sg
+Instance.new("UICorner",win).CornerRadius=UDim.new(0,10)
+
+local ttl=Instance.new("TextLabel",win)
+ttl.Size=UDim2.new(1,0,0,36)
+ttl.BackgroundColor3=Color3.fromRGB(138,43,226)
+ttl.Text="Gravity Hub | Blox Fruits"
+ttl.TextColor3=Color3.fromRGB(255,255,255)
+ttl.Font=Enum.Font.GothamBold
+ttl.TextSize=15
+ttl.BorderSizePixel=0
+ttl.Parent=win
+Instance.new("UICorner",ttl).CornerRadius=UDim.new(0,10)
+
+local cb=Instance.new("TextButton",win)
+cb.Size=UDim2.new(0,26,0,26)
+cb.Position=UDim2.new(1,-34,0,5)
+cb.BackgroundColor3=Color3.fromRGB(220,70,70)
+cb.Text="X"
+cb.TextColor3=Color3.fromRGB(255,255,255)
+cb.Font=Enum.Font.GothamBold
+cb.TextSize=13
+cb.BorderSizePixel=0
+Instance.new("UICorner",cb).CornerRadius=UDim.new(0,6)
+
+local b1=Instance.new("TextButton",win)
+b1.Size=UDim2.new(1,-20,0,36)
+b1.Position=UDim2.new(0,10,0,50)
+b1.BackgroundColor3=Color3.fromRGB(36,36,46)
+b1.Text="Pular Alto"
+b1.TextColor3=Color3.fromRGB(240,240,240)
+b1.Font=Enum.Font.Gotham
+b1.TextSize=13
+b1.BorderSizePixel=0
+Instance.new("UICorner",b1).CornerRadius=UDim.new(0,6)
+b1.MouseButton1Click:Connect(function()
+local ch=plr.Character
+if ch and ch:FindFirstChild("HumanoidRootPart")then ch.HumanoidRootPart.Velocity=Vector3.new(0,100,0)end
+end)
+
+local b2=Instance.new("TextButton",win)
+b2.Size=UDim2.new(1,-20,0,36)
+b2.Position=UDim2.new(0,10,0,94)
+b2.BackgroundColor3=Color3.fromRGB(36,36,46)
+b2.Text="Velocidade 50"
+b2.TextColor3=Color3.fromRGB(240,240,240)
+b2.Font=Enum.Font.Gotham
+b2.TextSize=13
+b2.BorderSizePixel=0
+Instance.new("UICorner",b2).CornerRadius=UDim.new(0,6)
+b2.MouseButton1Click:Connect(function()
+local ch=plr.Character
+if ch and ch:FindFirstChild("Humanoid")then ch.Humanoid.WalkSpeed=50 end
+end)
+
+local b3=Instance.new("TextButton",win)
+b3.Size=UDim2.new(1,-20,0,36)
+b3.Position=UDim2.new(0,10,0,138)
+b3.BackgroundColor3=Color3.fromRGB(80,30,30)
+b3.Text="Auto Farm: OFF"
+b3.TextColor3=Color3.fromRGB(240,240,240)
+b3.Font=Enum.Font.Gotham
+b3.TextSize=13
+b3.BorderSizePixel=0
+Instance.new("UICorner",b3).CornerRadius=UDim.new(0,6)
+
+local stFarm=Instance.new("TextLabel",win)
+stFarm.Size=UDim2.new(1,-20,0,30)
+stFarm.Position=UDim2.new(0,10,0,178)
+stFarm.BackgroundColor3=Color3.fromRGB(36,36,46)
+stFarm.Text="  Parado"
+stFarm.TextColor3=Color3.fromRGB(180,180,180)
+stFarm.Font=Enum.Font.Gotham
+stFarm.TextSize=11
+stFarm.TextXAlignment=Enum.TextXAlignment.Left
+stFarm.BorderSizePixel=0
+stFarm.Parent=win
+Instance.new("UICorner",stFarm).CornerRadius=UDim.new(0,6)
+
+local b4=Instance.new("TextButton",win)
+b4.Size=UDim2.new(1,-20,0,36)
+b4.Position=UDim2.new(0,10,0,214)
+b4.BackgroundColor3=Color3.fromRGB(80,30,30)
+b4.Text="Auto Fruta: OFF"
+b4.TextColor3=Color3.fromRGB(240,240,240)
+b4.Font=Enum.Font.Gotham
+b4.TextSize=13
+b4.BorderSizePixel=0
+Instance.new("UICorner",b4).CornerRadius=UDim.new(0,6)
+
+local quests={
+{L=1,M="Bandit",QN="BanditQuest1",QL=1},
+{L=10,M="Monkey",QN="JungleQuest",QL=1},
+{L=15,M="Gorilla",QN="JungleQuest",QL=2},
+{L=30,M="Pirate",QN="BuggyQuest1",QL=1},
+{L=40,M="Brute",QN="BuggyQuest1",QL=2},
+{L=60,M="Desert Bandit",QN="DesertQuest",QL=1},
+{L=75,M="Desert Officer",QN="DesertQuest",QL=2},
+{L=90,M="Snow Bandit",QN="SnowQuest",QL=1},
+{L=100,M="Snowman",QN="SnowQuest",QL=2},
+{L=120,M="Chief Petty Officer",QN="MarineQuest2",QL=1},
+{L=150,M="Sky Bandit",QN="SkyQuest",QL=1},
+{L=175,M="Dark Master",QN="SkyQuest",QL=2},
+{L=190,M="Prisoner",QN="PrisonerQuest",QL=1},
+{L=210,M="Dangerous Prisoner",QN="PrisonerQuest",QL=2},
+{L=250,M="Toga Warrior",QN="ColosseumQuest",QL=1},
+{L=275,M="Gladiator",QN="ColosseumQuest",QL=2},
+{L=300,M="Military Soldier",QN="MagmaQuest",QL=1},
+{L=325,M="Military Spy",QN="MagmaQuest",QL=2},
+{L=375,M="Fishman Warrior",QN="FishmanQuest",QL=1},
+{L=400,M="Fishman Commando",QN="FishmanQuest",QL=2},
+{L=450,M="God's Guard",QN="SkyExp1Quest",QL=1},
+{L=475,M="Shanda",QN="SkyExp1Quest",QL=2},
+{L=525,M="Royal Squad",QN="SkyExp2Quest",QL=1},
+{L=550,M="Royal Soldier",QN="SkyExp2Quest",QL=2},
+{L=625,M="Galley Pirate",QN="FountainQuest",QL=1},
+{L=650,M="Galley Captain",QN="FountainQuest",QL=2},
+{L=700,M="Raider",QN="Area1Quest",QL=1},
+{L=725,M="Mercenary",QN="Area1Quest",QL=2},
+{L=775,M="Swan Pirate",QN="Area2Quest",QL=1},
+{L=800,M="Factory Staff",QN="Area2Quest",QL=2},
+{L=875,M="Marine Lieutenant",QN="MarineQuest3",QL=1},
+{L=900,M="Marine Captain",QN="MarineQuest3",QL=2},
+{L=950,M="Zombie",QN="ZombieQuest",QL=1},
+{L=975,M="Vampire",QN="ZombieQuest",QL=2},
+{L=1000,M="Snow Trooper",QN="SnowQuest3",QL=1},
+{L=1050,M="Winter Warrior",QN="SnowQuest3",QL=2},
+{L=1100,M="Lab Subordinate",QN="LabQuest",QL=1},
+{L=1125,M="Horned Warrior",QN="LabQuest",QL=2},
+{L=1175,M="Magma Ninja",QN="MagmaQuest2",QL=1},
+{L=1200,M="Lava Pirate",QN="MagmaQuest2",QL=2},
+{L=1250,M="Ship Deckhand",QN="ShipQuest1",QL=1},
+{L=1275,M="Ship Engineer",QN="ShipQuest1",QL=2},
+{L=1300,M="Ship Steward",QN="ShipQuest2",QL=1},
+{L=1325,M="Ship Officer",QN="ShipQuest2",QL=2},
+{L=1350,M="Arctic Warrior",QN="FrostQuest",QL=1},
+{L=1375,M="Snow Lurker",QN="FrostQuest",QL=2},
+{L=1425,M="Sea Soldier",QN="ForgottenQuest",QL=1},
+{L=1450,M="Water Fighter",QN="ForgottenQuest",QL=2},
+{L=1500,M="Pirate Millionaire",QN="PiratePortQuest",QL=1},
+{L=1525,M="Pistol Billionaire",QN="PiratePortQuest",QL=2},
+{L=1575,M="Dragon Crew Warrior",QN="DragonCrewQuest",QL=1},
+{L=1600,M="Dragon Crew Archer",QN="DragonCrewQuest",QL=2},
+{L=1625,M="Hydra Enforcer",QN="HydraQuest",QL=1},
+{L=1650,M="Venomous Assailant",QN="HydraQuest",QL=2},
+{L=1700,M="Marine Commodore",QN="GreatTreeQuest",QL=1},
+{L=1725,M="Marine Rear Admiral",QN="GreatTreeQuest",QL=2},
+{L=1775,M="Fishman Raider",QN="TurtleQuest",QL=1},
+{L=1800,M="Fishman Captain",QN="TurtleQuest",QL=2},
+{L=1825,M="Forest Pirate",QN="DeepForestQuest",QL=1},
+{L=1850,M="Mythological Pirate",QN="DeepForestQuest",QL=2},
+{L=1900,M="Jungle Pirate",QN="DeepForestQuest2",QL=1},
+{L=1925,M="Musketeer Pirate",QN="DeepForestQuest2",QL=2},
+{L=1975,M="Reborn Skeleton",QN="HauntedQuest1",QL=1},
+{L=2000,M="Living Zombie",QN="HauntedQuest1",QL=2},
+{L=2025,M="Demonic Soul",QN="HauntedQuest2",QL=1},
+{L=2050,M="Possessed Mummy",QN="HauntedQuest2",QL=2},
+{L=2075,M="Peanut Scout",QN="PeanutQuest",QL=1},
+{L=2100,M="Peanut President",QN="PeanutQuest",QL=2},
+{L=2125,M="Ice Cream Chef",QN="IceCreamQuest",QL=1},
+{L=2150,M="Ice Cream Commander",QN="IceCreamQuest",QL=2},
+{L=2200,M="Cookie Crafter",QN="CakeQuest1",QL=1},
+{L=2225,M="Cake Guard",QN="CakeQuest1",QL=2},
+{L=2250,M="Baking Staff",QN="CakeQuest2",QL=1},
+{L=2275,M="Head Baker",QN="CakeQuest2",QL=2},
+{L=2300,M="Cocoa Warrior",QN="ChocolateQuest1",QL=1},
+{L=2325,M="Chocolate Bar Battler",QN="ChocolateQuest1",QL=2},
+{L=2350,M="Sweet Thief",QN="ChocolateQuest2",QL=1},
+{L=2375,M="Candy Rebel",QN="ChocolateQuest2",QL=2},
+{L=2400,M="Candy Pirate",QN="CandyCaneQuest",QL=1},
+{L=2425,M="Snow Demon",QN="CandyCaneQuest",QL=2},
+{L=2450,M="Isle Outlaw",QN="TikiQuest1",QL=1},
+{L=2475,M="Island Boy",QN="TikiQuest1",QL=2},
+{L=2500,M="Sun-kissed Warrior",QN="TikiQuest2",QL=1},
+{L=2525,M="Isle Champion",QN="TikiQuest2",QL=2},
+{L=2550,M="Serpent Hunter",QN="TikiQuest3",QL=1},
+{L=2575,M="Skull Slayer",QN="TikiQuest3",QL=2},
+{L=2600,M="Reef Bandit",QN="SubmergedQuest1",QL=1},
+{L=2625,M="Coral Pirate",QN="SubmergedQuest1",QL=2},
+{L=2650,M="Sea Chanter",QN="SubmergedQuest2",QL=1},
+{L=2675,M="Ocean Prophet",QN="SubmergedQuest2",QL=2},
+{L=2700,M="High Disciple",QN="SubmergedQuest3",QL=1},
+{L=2725,M="Grand Devotee",QN="SubmergedQuest3",QL=2}}
+
+local ESTILOS={"Combat","Black Leg","Electro","Fishman Karate","Superhuman","Death Step","Sharkman Karate","Electric Claw","Dragon Talon","Godhuman","Sanguine Art"}
+
+local function gLvl()
+local d=plr:FindFirstChild("Data")
+if d and d:FindFirstChild("Level")then return d.Level.Value end
+return 1
+end
+
+local function gQ(lv)
+local q=quests[1]
+for _,v in ipairs(quests)do if v.L<=lv then q=v else break end end
+return q
+end
+
+local function aIni(nm)
+local ch=plr.Character
+if not ch or not ch:FindFirstChild("HumanoidRootPart")then return nil end
+local pos=ch.HumanoidRootPart.Position
+local best,bd=nil,math.huge
+for _,o in ipairs(workspace:GetDescendants())do
+if o:IsA("Model")and o.Name:lower():find(nm:lower(),1,true)then
+local hrp=o:FindFirstChild("HumanoidRootPart")
+local hum=o:FindFirstChildOfClass("Humanoid")
+if hrp and hum and hum.Health>0 then
+local d=(hrp.Position-pos).Magnitude
+if d<bd then bd=d best=o end
+end
+end
+end
+return best
+end
+
+local function eqp()
+local ch=plr.Character
+if not ch then return end
+local hum=ch:FindFirstChildOfClass("Humanoid")
+if not hum then return end
+local eq=ch:FindFirstChildOfClass("Tool")
+if eq then
+for _,n in ipairs(ESTILOS)do if eq.Name:lower():find(n:lower(),1,true)then return end end
+end
+local bp=plr:FindFirstChild("Backpack")
+if not bp then return end
+for _,n in ipairs(ESTILOS)do
+for _,it in ipairs(bp:GetChildren())do
+if it:IsA("Tool")and it.Name:lower():find(n:lower(),1,true)then hum:EquipTool(it)return end
+end
+end
+end
+
+local function aceitar(q)
+if not q.QN then return end
+pcall(function()RS.Remotes.CommF_:InvokeServer("StartQuest",q.QN,q.QL)end)
+end
+
+local function atk()
+local ch=plr.Character
+if not ch then return end
+local t=ch:FindFirstChildOfClass("Tool")
+if t then pcall(function()t:Activate()end)end
+pcall(function()game:GetService("VirtualUser"):ClickButton1(Vector2.new(0,0))end)
+end
+
+local function loopFarm()
+while autoFarm do
+local ch=plr.Character
+if ch and ch:FindFirstChild("HumanoidRootPart")then
+local lv=gLvl()
+local q=gQ(lv)
+if not missao or missao.L~=q.L then
+missao=q
+killCount=0
+aceitar(q)
+ultimaTent=tick()
+task.wait(0.5)
+end
+if tick()-ultimaTent>15 then aceitar(q)ultimaTent=tick()end
+local alvo=aIni(q.M)
+if alvo and alvo:FindFirstChild("HumanoidRootPart")then
+local hrp=alvo.HumanoidRootPart
+local hum=alvo:FindFirstChildOfClass("Humanoid")
+local myH=ch.HumanoidRootPart
+myH.CFrame=CFrame.new(hrp.Position+Vector3.new(0,4,0.5),hrp.Position)
+myH.Velocity=Vector3.new(0,0,0)
+eqp()
+if hum and hum.Health>0 then
+for _=1,5 do atk()task.wait(0.1)end
+stFarm.Text="  Nv "..lv.." | "..q.M.." | HP "..math.floor(hum.Health).." | Kills "..killCount
+else killCount=killCount+1 end
+else stFarm.Text="  Nv "..lv.." | Procurando "..q.M.."..." end
+end
+task.wait(0.1)
+end
+stFarm.Text="  Parado"
+end
+
+local function hasBeli()
+local d=plr:FindFirstChild("Data")
+if d and d:FindFirstChild("Beli")then return d.Beli.Value>=1000000 end
+return false
+end
+
+local function aFru()
+local ch=plr.Character
+if not ch or not ch:FindFirstChild("HumanoidRootPart")then return nil end
+local best,bd=nil,math.huge
+for _,o in ipairs(workspace:GetDescendants())do
+if o:IsA("Model")and(o.Name:lower():find("fruit")or o:FindFirstChild("Fruit"))then
+local hrp=o:FindFirstChild("HumanoidRootPart")or o:FindFirstChild("Handle")
+if hrp then
+local d=(hrp.Position-ch.HumanoidRootPart.Position).Magnitude
+if d<bd then bd=d best=o end
+end
+end
+end
+return best
+end
+
+local function loopFru()
+while autoFruit do
+local ch=plr.Character
+if ch and ch:FindFirstChild("HumanoidRootPart")then
+if not hasBeli()then stFarm.Text="  Beli insuficiente"task.wait(2)
+else
+local f=aFru()
+if f then
+stFarm.Text="  Coletando: "..f.Name
+local wf=autoFarm
+autoFarm=false
+task.wait(0.5)
+local hrpF=f:FindFirstChild("HumanoidRootPart")or f:FindFirstChild("Handle")
+if hrpF then
+local dst=(hrpF.Position-ch.HumanoidRootPart.Position).Magnitude
+local tw=TS:Create(ch.HumanoidRootPart,TweenInfo.new(dst/80,Enum.EasingStyle.Linear),{CFrame=CFrame.new(hrpF.Position)})
+tw:Play()
+tw.Completed:Wait()
+end
+pcall(function()RS.Remotes.CommF_:InvokeServer("StoreFruit",f.Name)end)
+task.wait(1)
+stFarm.Text="  Armazenada: "..f.Name
+if wf then autoFarm=true task.spawn(loopFarm)end
+else stFarm.Text="  Procurando fruta..." end
+end
+end
+end
+task.wait(1)
+end
+end
+
+b3.MouseButton1Click:Connect(function()
+autoFarm=not autoFarm
+if autoFarm then
+b3.Text="Auto Farm: ON"
+b3.BackgroundColor3=Color3.fromRGB(30,120,40)
+killCount=0
+missao=nil
+task.spawn(loopFarm)
+else
+b3.Text="Auto Farm: OFF"
+b3.BackgroundColor3=Color3.fromRGB(80,30,30)
+end
+end)
+
+b4.MouseButton1Click:Connect(function()
+autoFruit=not autoFruit
+if autoFruit then
+b4.Text="Auto Fruta: ON"
+b4.BackgroundColor3=Color3.fromRGB(30,120,40)
+task.spawn(loopFru)
+else
+b4.Text="Auto Fruta: OFF"
+b4.BackgroundColor3=Color3.fromRGB(80,30,30)
+end
+end)
+
+cb.MouseButton1Click:Connect(function()
+autoFarm=false
+autoFruit=false
+sg:Destroy()
+end)
+
+print("=== GravityHub OK ===")

@@ -3,6 +3,8 @@ local RS=game:GetService("ReplicatedStorage")
 local RunService=game:GetService("RunService")
 local pg=plr:WaitForChild("PlayerGui")
 local VIM=game:GetService("VirtualUser")
+local TweenService=game:GetService("TweenService")
+local UIS=game:GetService("UserInputService")
 for _,g in ipairs(pg:GetChildren())do if g:IsA("ScreenGui")and(g.Name=="GravityHub"or g.Name=="MiniHub"or g.Name=="MeuMenu")then g:Destroy()end end
 _G.autoF=false
 _G.kC=0
@@ -11,134 +13,217 @@ _G.uT=0
 local sg=Instance.new("ScreenGui")
 sg.Name="GravityHub"
 sg.ResetOnSpawn=false
+sg.IgnoreGuiInset=true
 sg.Parent=pg
-local CF=Color3.fromRGB(18,18,24)
-local CB=Color3.fromRGB(24,24,32)
-local CE=Color3.fromRGB(32,32,42)
-local CEH=Color3.fromRGB(42,42,55)
-local CA=Color3.fromRGB(138,43,226)
-local CA2=Color3.fromRGB(180,90,255)
-local CT=Color3.fromRGB(240,240,245)
-local CTD=Color3.fromRGB(150,150,165)
-local CR=Color3.fromRGB(220,70,70)
+local CF=Color3.fromRGB(14,14,20)
+local CB=Color3.fromRGB(20,20,30)
+local CE=Color3.fromRGB(28,28,40)
+local CEH=Color3.fromRGB(42,42,60)
+local CA=Color3.fromRGB(155,89,255)
+local CA2=Color3.fromRGB(255,120,255)
+local CT=Color3.fromRGB(245,245,255)
+local CTD=Color3.fromRGB(140,140,165)
+local CR=Color3.fromRGB(255,80,100)
+local CG=Color3.fromRGB(80,220,120)
 local win=Instance.new("Frame",sg)
-win.Size=UDim2.new(0,440,0,400)
-win.Position=UDim2.new(0.5,-220,0.5,-200)
+win.Size=UDim2.new(0,460,0,430)
+win.Position=UDim2.new(0.5,-230,0.5,-215)
 win.BackgroundColor3=CF
 win.BorderSizePixel=0
-Instance.new("UICorner",win).CornerRadius=UDim.new(0,14)
+Instance.new("UICorner",win).CornerRadius=UDim.new(0,16)
 local ws=Instance.new("UIStroke",win)
 ws.Color=CA
 ws.Thickness=1.5
-ws.Transparency=0.3
+ws.Transparency=0.4
+local grad=Instance.new("UIGradient",win)
+grad.Color=ColorSequence.new({
+ColorSequenceKeypoint.new(0,Color3.fromRGB(30,20,50)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(18,18,28)),
+ColorSequenceKeypoint.new(1,Color3.fromRGB(25,15,40))
+})
+grad.Rotation=135
+local gl=Instance.new("UIGradient",ws)
+gl.Color=ColorSequence.new({
+ColorSequenceKeypoint.new(0,Color3.fromRGB(155,89,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,120,255)),
+ColorSequenceKeypoint.new(1,Color3.fromRGB(100,200,255))
+})
+gl.Rotation=45
+task.spawn(function()
+while sg.Parent do
+gl.Rotation=gl.Rotation+2
+task.wait(0.05)
+end
+end)
 local minimizado=false
 local ttl=Instance.new("Frame",win)
-ttl.Size=UDim2.new(1,0,0,42)
+ttl.Size=UDim2.new(1,0,0,48)
 ttl.BackgroundColor3=CB
 ttl.BorderSizePixel=0
-Instance.new("UICorner",ttl).CornerRadius=UDim.new(0,14)
+Instance.new("UICorner",ttl).CornerRadius=UDim.new(0,16)
 local tf=Instance.new("Frame",ttl)
 tf.Size=UDim2.new(1,0,0,15)
 tf.Position=UDim2.new(0,0,1,-15)
 tf.BackgroundColor3=CB
 tf.BorderSizePixel=0
+local barGrad=Instance.new("UIGradient",ttl)
+barGrad.Color=ColorSequence.new({
+ColorSequenceKeypoint.new(0,Color3.fromRGB(155,89,255)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(120,60,220)),
+ColorSequenceKeypoint.new(1,Color3.fromRGB(80,40,180))
+})
 local dot=Instance.new("Frame",ttl)
-dot.Size=UDim2.new(0,10,0,10)
-dot.Position=UDim2.new(0,14,0.5,-5)
+dot.Size=UDim2.new(0,12,0,12)
+dot.Position=UDim2.new(0,16,0.5,-6)
 dot.BackgroundColor3=Color3.fromRGB(255,255,255)
 dot.BorderSizePixel=0
 Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
+local dotStroke=Instance.new("UIStroke",dot)
+dotStroke.Color=Color3.fromRGB(255,200,255)
+dotStroke.Thickness=2
+task.spawn(function()
+while dot.Parent do
+local tw=TweenService:Create(dotStroke,TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=0.8})
+tw:Play()
+tw.Completed:Wait()
+local tw2=TweenService:Create(dotStroke,TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=0})
+tw2:Play()
+tw2.Completed:Wait()
+end
+end)
 local tTit=Instance.new("TextLabel",ttl)
-tTit.Size=UDim2.new(0,200,1,0)
-tTit.Position=UDim2.new(0,32,0,0)
+tTit.Size=UDim2.new(0,220,1,0)
+tTit.Position=UDim2.new(0,36,0,0)
 tTit.BackgroundTransparency=1
-tTit.Text="Gravity Hub"
+tTit.Text="GRAVITY HUB"
 tTit.TextColor3=Color3.fromRGB(255,255,255)
-tTit.Font=Enum.Font.GothamBold
+tTit.Font=Enum.Font.GothamBlack
 tTit.TextSize=16
 tTit.TextXAlignment=Enum.TextXAlignment.Left
 local tSub=Instance.new("TextLabel",ttl)
-tSub.Size=UDim2.new(0,150,1,0)
-tSub.Position=UDim2.new(0,140,0,0)
+tSub.Size=UDim2.new(0,200,1,0)
+tSub.Position=UDim2.new(0,150,0,0)
 tSub.BackgroundTransparency=1
-tSub.Text="| Blox Fruits"
-tSub.TextColor3=Color3.fromRGB(220,200,255)
+tSub.Text="  - Blox Fruits"
+tSub.TextColor3=Color3.fromRGB(220,180,255)
 tSub.Font=Enum.Font.Gotham
 tSub.TextSize=12
 tSub.TextXAlignment=Enum.TextXAlignment.Left
 local minBtn=Instance.new("TextButton",ttl)
-minBtn.Size=UDim2.new(0,28,0,28)
-minBtn.Position=UDim2.new(1,-70,0.5,-14)
-minBtn.BackgroundColor3=Color3.fromRGB(60,60,80)
-minBtn.Text="—"
-minBtn.TextColor3=Color3.fromRGB(255,255,255)
-minBtn.Font=Enum.Font.GothamBold
-minBtn.TextSize=16
+minBtn.Size=UDim2.new(0,30,0,30)
+minBtn.Position=UDim2.new(1,-76,0.5,-15)
+minBtn.BackgroundColor3=Color3.fromRGB(45,45,65)
+minBtn.Text="-"
+minBtn.TextColor3=CT
+minBtn.Font=Enum.Font.GothamBlack
+minBtn.TextSize=18
 minBtn.BorderSizePixel=0
 minBtn.AutoButtonColor=false
-Instance.new("UICorner",minBtn).CornerRadius=UDim.new(0,7)
+Instance.new("UICorner",minBtn).CornerRadius=UDim.new(0,8)
 local cb=Instance.new("TextButton",ttl)
-cb.Size=UDim2.new(0,28,0,28)
-cb.Position=UDim2.new(1,-36,0.5,-14)
+cb.Size=UDim2.new(0,30,0,30)
+cb.Position=UDim2.new(1,-40,0.5,-15)
 cb.BackgroundColor3=CR
 cb.Text="X"
 cb.TextColor3=Color3.fromRGB(255,255,255)
-cb.Font=Enum.Font.GothamBold
-cb.TextSize=13
+cb.Font=Enum.Font.GothamBlack
+cb.TextSize=14
 cb.BorderSizePixel=0
 cb.AutoButtonColor=false
-Instance.new("UICorner",cb).CornerRadius=UDim.new(0,7)
+Instance.new("UICorner",cb).CornerRadius=UDim.new(0,8)
 local cred=Instance.new("TextLabel",win)
-cred.Size=UDim2.new(1,-20,0,18)
-cred.Position=UDim2.new(0,10,1,-24)
+cred.Size=UDim2.new(1,-20,0,22)
+cred.Position=UDim2.new(0,10,1,-28)
 cred.BackgroundTransparency=1
 cred.Text="GrandGroup"
 cred.TextColor3=CA2
-cred.Font=Enum.Font.GothamBold
-cred.TextSize=11
+cred.Font=Enum.Font.GothamBlack
+cred.TextSize=12
 cred.TextXAlignment=Enum.TextXAlignment.Center
-cred.TextTransparency=0.3
-local stFarm=Instance.new("TextLabel",win)
-stFarm.Size=UDim2.new(1,-20,0,65)
-stFarm.Position=UDim2.new(0,10,0,300)
-stFarm.BackgroundColor3=CE
-stFarm.Text="  Parado"
-stFarm.TextColor3=CTD
+cred.TextTransparency=0.2
+local statusBox=Instance.new("Frame",win)
+statusBox.Size=UDim2.new(1,-20,0,75)
+statusBox.Position=UDim2.new(0,10,0,305)
+statusBox.BackgroundColor3=CE
+statusBox.BorderSizePixel=0
+Instance.new("UICorner",statusBox).CornerRadius=UDim.new(0,10)
+local statusStroke=Instance.new("UIStroke",statusBox)
+statusStroke.Color=CA
+statusStroke.Thickness=1
+statusStroke.Transparency=0.5
+local statusDot=Instance.new("Frame",statusBox)
+statusDot.Size=UDim2.new(0,8,0,8)
+statusDot.Position=UDim2.new(0,12,0,12)
+statusDot.BackgroundColor3=CTD
+statusDot.BorderSizePixel=0
+Instance.new("UICorner",statusDot).CornerRadius=UDim.new(1,0)
+local stTitle=Instance.new("TextLabel",statusBox)
+stTitle.Size=UDim2.new(1,-40,0,18)
+stTitle.Position=UDim2.new(0,26,0,7)
+stTitle.BackgroundTransparency=1
+stTitle.Text="STATUS"
+stTitle.TextColor3=CTD
+stTitle.Font=Enum.Font.GothamBold
+stTitle.TextSize=10
+stTitle.TextXAlignment=Enum.TextXAlignment.Left
+local stFarm=Instance.new("TextLabel",statusBox)
+stFarm.Size=UDim2.new(1,-24,0,45)
+stFarm.Position=UDim2.new(0,12,0,26)
+stFarm.BackgroundTransparency=1
+stFarm.Text="Parado"
+stFarm.TextColor3=CT
 stFarm.Font=Enum.Font.Gotham
 stFarm.TextSize=11
 stFarm.TextXAlignment=Enum.TextXAlignment.Left
 stFarm.TextYAlignment=Enum.TextYAlignment.Top
 stFarm.TextWrapped=true
-stFarm.BorderSizePixel=0
-Instance.new("UICorner",stFarm).CornerRadius=UDim.new(0,8)
-local function criarBotao(texto,y,cor)
+
+
+local function criarBotao(icone,texto,y,corA,corB)
 local b=Instance.new("TextButton",win)
-b.Size=UDim2.new(1,-20,0,42)
+b.Size=UDim2.new(1,-20,0,48)
 b.Position=UDim2.new(0,10,0,y)
-b.BackgroundColor3=cor or CE
-b.Text=texto
-b.TextColor3=CT
-b.Font=Enum.Font.GothamBold
-b.TextSize=13
+b.BackgroundColor3=CE
+b.Text=""
 b.BorderSizePixel=0
 b.AutoButtonColor=false
-Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
-return b
+Instance.new("UICorner",b).CornerRadius=UDim.new(0,10)
+local str=Instance.new("UIStroke",b)
+str.Color=CA
+str.Thickness=1
+str.Transparency=0.7
+local ico=Instance.new("TextLabel",b)
+ico.Size=UDim2.new(0,40,1,0)
+ico.Position=UDim2.new(0,6,0,0)
+ico.BackgroundTransparency=1
+ico.Text=icone
+ico.TextColor3=CT
+ico.Font=Enum.Font.GothamBold
+ico.TextSize=20
+ico.TextXAlignment=Enum.TextXAlignment.Center
+local lbl=Instance.new("TextLabel",b)
+lbl.Size=UDim2.new(1,-56,1,0)
+lbl.Position=UDim2.new(0,48,0,0)
+lbl.BackgroundTransparency=1
+lbl.Text=texto
+lbl.TextColor3=CT
+lbl.Font=Enum.Font.GothamBold
+lbl.TextSize=13
+lbl.TextXAlignment=Enum.TextXAlignment.Left
+return b,lbl
 end
-local b1=criarBotao("Pular Alto",52)
-local b2=criarBotao("Velocidade 50",98)
-local b3=criarBotao("Auto Farm: OFF",144,Color3.fromRGB(90,30,30))
-local b4=criarBotao("Auto Fruta: OFF",190,Color3.fromRGB(90,30,30))
-
-local TweenService=game:GetService("TweenService")
+local b1,l1=criarBotao("P","Pular Alto",56)
+local b2,l2=criarBotao("V","Velocidade 50",112,Color3.fromRGB(30,50,80),Color3.fromRGB(20,35,60))
+local b3,l3=criarBotao("A","Auto Farm: OFF",168,Color3.fromRGB(90,30,45),Color3.fromRGB(60,20,35))
+local b4,l4=criarBotao("F","Auto Fruta: OFF",224,Color3.fromRGB(90,30,45),Color3.fromRGB(60,20,35))
 for _,btn in ipairs({b1,b2,b3,b4})do
 btn.MouseEnter:Connect(function()
-TweenService:Create(btn,TweenInfo.new(0.15),{BackgroundColor3=CEH}):Play()
+TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=CEH}):Play()
 end)
 btn.MouseLeave:Connect(function()
 if btn==b3 and _G.autoF then return end
 if btn==b4 then return end
-TweenService:Create(btn,TweenInfo.new(0.15),{BackgroundColor3=CE}):Play()
+TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=CE}):Play()
 end)
 end
 b1.MouseButton1Click:Connect(function()
@@ -149,11 +234,23 @@ b2.MouseButton1Click:Connect(function()
 local c=plr.Character
 if c and c:FindFirstChild("Humanoid")then c.Humanoid.WalkSpeed=50 end
 end)
+minBtn.MouseEnter:Connect(function()
+TweenService:Create(minBtn,TweenInfo.new(0.15),{BackgroundColor3=CA}):Play()
+end)
+minBtn.MouseLeave:Connect(function()
+TweenService:Create(minBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(45,45,65)}):Play()
+end)
+cb.MouseEnter:Connect(function()
+TweenService:Create(cb,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(255,110,130)}):Play()
+end)
+cb.MouseLeave:Connect(function()
+TweenService:Create(cb,TweenInfo.new(0.15),{BackgroundColor3=CR}):Play()
+end)
 minBtn.MouseButton1Click:Connect(function()
 minimizado=not minimizado
 if minimizado then
-win.Size=UDim2.new(0,440,0,42)
-stFarm.Visible=false
+TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,460,0,48)}):Play()
+statusBox.Visible=false
 b1.Visible=false
 b2.Visible=false
 b3.Visible=false
@@ -161,33 +258,31 @@ b4.Visible=false
 cred.Visible=false
 minBtn.Text="+"
 else
-win.Size=UDim2.new(0,440,0,400)
-stFarm.Visible=true
+TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,460,0,430)}):Play()
+statusBox.Visible=true
 b1.Visible=true
 b2.Visible=true
 b3.Visible=true
 b4.Visible=true
 cred.Visible=true
-minBtn.Text="—"
+minBtn.Text="-"
 end
 end)
 cb.MouseButton1Click:Connect(function() sg:Destroy() end)
-local arrastando=false
-local iniMouse,iniPos
+local arr=false
+local im,ip
 ttl.InputBegan:Connect(function(input)
 if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-arrastando=true
-iniMouse=input.Position
-iniPos=win.Position
+arr=true im=input.Position ip=win.Position
 input.Changed:Connect(function()
-if input.UserInputState==Enum.UserInputState.End then arrastando=false end
+if input.UserInputState==Enum.UserInputState.End then arr=false end
 end)
 end
 end)
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-if arrastando and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch)then
-local delta=input.Position-iniMouse
-win.Position=UDim2.new(iniPos.X.Scale,iniPos.X.Offset+delta.X,iniPos.Y.Scale,iniPos.Y.Offset+delta.Y)
+UIS.InputChanged:Connect(function(input)
+if arr and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch)then
+local d=input.Position-im
+win.Position=UDim2.new(ip.X.Scale,ip.X.Offset+d.X,ip.Y.Scale,ip.Y.Offset+d.Y)
 end
 end)
 local NPCs={
@@ -371,7 +466,7 @@ while _G.autoF and (tick()-t0)<4 do
 local y=hrp.Position.Y
 if math.abs(y-alturaAlvo)<3 then break end
 bp1.Position=Vector3.new(hrp.Position.X,alturaAlvo,hrp.Position.Z)
-task.wait(0.03)
+task.wait(0.01)
 end
 if bp1.Parent then bp1:Destroy() end
 end
@@ -414,7 +509,7 @@ bp.Position=Vector3.new(pos.X,alturaAtual,pos.Z)
 bg.CFrame=CFrame.new(pos,destino)
 end)
 while not finalizado and _G.autoF do
-task.wait(0.03)
+task.wait(0.01)
 end
 if conn then conn:Disconnect() end
 if bv.Parent then bv:Destroy() end
@@ -429,7 +524,7 @@ if dist3D<4 then break end
 local novoY=pos.Y+diff.Unit.Y*math.min(50,math.abs(diff.Y)+5)
 if math.abs(diff.Y)<3 then novoY=destino.Y end
 bp.Position=Vector3.new(destino.X,novoY,destino.Z)
-task.wait(0.03)
+task.wait(0.01)
 end
 end
 if bp.Parent then bp:Destroy() end
@@ -500,6 +595,14 @@ local t=c:FindFirstChildOfClass("Tool")
 if t then pcall(function() t:Activate() end) end
 pcall(function() RS.Remotes.CommF_:InvokeServer("Attack",true) end)
 pcall(function() VIM:ClickButton1(Vector2.new(0,0)) end)
+pcall(function()
+VIM:SendMouseButtonEvent(0,0,0,true,game,1)
+task.wait(0.01)
+VIM:SendMouseButtonEvent(0,0,0,false,game,1)
+end)
+if u.Health>=u.MaxHealth then
+pcall(function() u:TakeDamage(5) end)
+end
 end
 local function garantirEstilo()
 local c=plr.Character
@@ -512,6 +615,7 @@ end
 end
 equipar()
 end
+
 local function loopFarm()
 while _G.autoF do
 local c=plr.Character
@@ -523,9 +627,9 @@ _G.missao=q
 _G.kC=0
 local npcPos=NPCs[q.QN]
 if npcPos then
-stFarm.Text="  Nv "..lv.." | Voando ate NPC "..q.QN
+stFarm.Text="Nv "..lv.." | Voando ate NPC "..q.QN
 voarPara(Vector3.new(npcPos.X,npcPos.Y+10,npcPos.Z),275,70)
-stFarm.Text="  Nv "..lv.." | Aceitando missao..."
+stFarm.Text="Nv "..lv.." | Aceitando missao..."
 task.wait(1.5)
 end
 pcall(function() RS.Remotes.CommF_:InvokeServer("StartQuest",q.QN,q.QL) end)
@@ -536,7 +640,8 @@ local kAtual,kNec=lerProgressoQuest()
 if kAtual==0 then kAtual=_G.kC end
 if kNec==0 then kNec=q.KL or 5 end
 if kAtual>=kNec and kNec>0 then
-stFarm.Text="  Missao completa! ("..kAtual.."/"..kNec..")"
+stFarm.Text="Missao completa! ("..kAtual.."/"..kNec..")"
+statusDot.BackgroundColor3=CG
 _G.missao=nil
 _G.kC=0
 task.wait(2)
@@ -549,7 +654,7 @@ local c2=plr.Character
 local hum=c2 and c2:FindFirstChildOfClass("Humanoid")
 local hrp=c2 and c2:FindFirstChild("HumanoidRootPart")
 if u and u.Health>0 and hum and hrp then
-stFarm.Text="  Nv "..lv.." | Voando ate "..q.M
+stFarm.Text="Nv "..lv.." | Voando ate "..q.M
 voarPara(h.Position+Vector3.new(0,10,0),275,30)
 local bp=Instance.new("BodyPosition")
 bp.MaxForce=Vector3.new(1e5,1e5,1e5)
@@ -565,8 +670,8 @@ bg.Parent=hrp
 hum.PlatformStand=true
 task.wait(0.1)
 local nomeEq=equipar()
-stFarm.Text="  Nv "..lv.." | Estilo: "..tostring(nomeEq)
-task.wait(0.5)
+stFarm.Text="Nv "..lv.." | Estilo: "..tostring(nomeEq)
+task.wait(0.3)
 local connPos
 connPos=RunService.Heartbeat:Connect(function()
 if not _G.autoF or not h.Parent or not hrp.Parent then return end
@@ -576,17 +681,20 @@ hrp.Velocity=Vector3.new(0,0,0)
 if hum.Parent then hum.PlatformStand=true end
 garantirEstilo()
 end)
-local t0=tick()
-while _G.autoF and u.Parent and u.Health>0 and (tick()-t0)<25 do
-if hum.Parent then hum.PlatformStand=true end
-garantirEstilo()
+local connAtk
+connAtk=RunService.Heartbeat:Connect(function()
+if not _G.autoF or not u.Parent or u.Health<=0 then return end
 atacarComDano(alvo)
-task.wait(0.36)
+end)
+local t0=tick()
+while _G.autoF and u.Parent and u.Health>0 and (tick()-t0)<30 do
 local kA,kN=lerProgressoQuest()
 if kA==0 then kA=_G.kC end
 if kN==0 then kN=q.KL or 5 end
-stFarm.Text="  Nv "..lv.." | "..q.M.." | HP "..math.floor(u.Health).." | Kills "..kA.."/"..kN
+stFarm.Text="Nv "..lv.." | "..q.M.." | HP "..math.floor(u.Health).." | Kills "..kA.."/"..kN
+task.wait(0.05)
 end
+if connAtk then connAtk:Disconnect() end
 if connPos then connPos:Disconnect() end
 if bp.Parent then bp:Destroy() end
 if bg.Parent then bg:Destroy() end
@@ -600,27 +708,30 @@ else
 local kA,kN=lerProgressoQuest()
 if kA==0 then kA=_G.kC end
 if kN==0 then kN=q.KL or 5 end
-stFarm.Text="  Nv "..lv.." | Procurando "..q.M.." | Kills: "..kA.."/"..kN
+stFarm.Text="Nv "..lv.." | Procurando "..q.M.." | Kills: "..kA.."/"..kN
 end
 end
 else
-stFarm.Text="  Sem personagem"
+stFarm.Text="Sem personagem"
 end
 task.wait(0.1)
 end
-stFarm.Text="  Parado"
+stFarm.Text="Parado"
 end
 b3.MouseButton1Click:Connect(function()
 _G.autoF=not _G.autoF
 if _G.autoF then
-b3.Text="Auto Farm: ON"
+l3.Text="Auto Farm: ON"
 b3.BackgroundColor3=Color3.fromRGB(30,120,40)
+statusDot.BackgroundColor3=CG
 _G.kC=0
 _G.missao=nil
 task.spawn(loopFarm)
 else
-b3.Text="Auto Farm: OFF"
-b3.BackgroundColor3=Color3.fromRGB(90,30,30)
+l3.Text="Auto Farm: OFF"
+b3.BackgroundColor3=CE
+statusDot.BackgroundColor3=CTD
 end
 end)
 print("=== Gravity Hub GrandGroup OK ===")
+

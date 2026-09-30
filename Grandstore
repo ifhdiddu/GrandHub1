@@ -5,16 +5,18 @@ local pg=plr:WaitForChild("PlayerGui")
 local VIM=game:GetService("VirtualUser")
 local TweenService=game:GetService("TweenService")
 local UIS=game:GetService("UserInputService")
+
 for _,g in ipairs(pg:GetChildren())do if g:IsA("ScreenGui")and(g.Name=="GravityHub"or g.Name=="MiniHub"or g.Name=="MeuMenu")then g:Destroy()end end
+
 _G.autoF=false
+_G.subFarm=false
+_G.raid=false
+_G.autoBoss=false
+_G.bossSelecionado=nil
 _G.kC=0
 _G.missao=nil
 _G.uT=0
-local sg=Instance.new("ScreenGui")
-sg.Name="GravityHub"
-sg.ResetOnSpawn=false
-sg.IgnoreGuiInset=true
-sg.Parent=pg
+
 local CF=Color3.fromRGB(14,14,20)
 local CB=Color3.fromRGB(20,20,30)
 local CE=Color3.fromRGB(28,28,40)
@@ -25,23 +27,25 @@ local CT=Color3.fromRGB(245,245,255)
 local CTD=Color3.fromRGB(140,140,165)
 local CR=Color3.fromRGB(255,80,100)
 local CG=Color3.fromRGB(80,220,120)
+
+local sg=Instance.new("ScreenGui")
+sg.Name="GravityHub"
+sg.ResetOnSpawn=false
+sg.IgnoreGuiInset=true
+sg.Parent=pg
+
 local win=Instance.new("Frame",sg)
-win.Size=UDim2.new(0,460,0,430)
-win.Position=UDim2.new(0.5,-230,0.5,-215)
+win.Size=UDim2.new(0,540,0,400)
+win.Position=UDim2.new(0.5,-270,0.5,-200)
 win.BackgroundColor3=CF
 win.BorderSizePixel=0
 Instance.new("UICorner",win).CornerRadius=UDim.new(0,16)
+
 local ws=Instance.new("UIStroke",win)
 ws.Color=CA
 ws.Thickness=1.5
 ws.Transparency=0.4
-local grad=Instance.new("UIGradient",win)
-grad.Color=ColorSequence.new({
-ColorSequenceKeypoint.new(0,Color3.fromRGB(30,20,50)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(18,18,28)),
-ColorSequenceKeypoint.new(1,Color3.fromRGB(25,15,40))
-})
-grad.Rotation=135
+
 local gl=Instance.new("UIGradient",ws)
 gl.Color=ColorSequence.new({
 ColorSequenceKeypoint.new(0,Color3.fromRGB(155,89,255)),
@@ -49,48 +53,48 @@ ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,120,255)),
 ColorSequenceKeypoint.new(1,Color3.fromRGB(100,200,255))
 })
 gl.Rotation=45
+
 task.spawn(function()
 while sg.Parent do
 gl.Rotation=gl.Rotation+2
 task.wait(0.05)
 end
 end)
+
 local minimizado=false
+
 local ttl=Instance.new("Frame",win)
 ttl.Size=UDim2.new(1,0,0,48)
 ttl.BackgroundColor3=CB
 ttl.BorderSizePixel=0
 Instance.new("UICorner",ttl).CornerRadius=UDim.new(0,16)
+
 local tf=Instance.new("Frame",ttl)
 tf.Size=UDim2.new(1,0,0,15)
 tf.Position=UDim2.new(0,0,1,-15)
 tf.BackgroundColor3=CB
 tf.BorderSizePixel=0
-local barGrad=Instance.new("UIGradient",ttl)
-barGrad.Color=ColorSequence.new({
-ColorSequenceKeypoint.new(0,Color3.fromRGB(155,89,255)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(120,60,220)),
-ColorSequenceKeypoint.new(1,Color3.fromRGB(80,40,180))
-})
+
 local dot=Instance.new("Frame",ttl)
 dot.Size=UDim2.new(0,12,0,12)
 dot.Position=UDim2.new(0,16,0.5,-6)
 dot.BackgroundColor3=Color3.fromRGB(255,255,255)
 dot.BorderSizePixel=0
 Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
+
 local dotStroke=Instance.new("UIStroke",dot)
 dotStroke.Color=Color3.fromRGB(255,200,255)
 dotStroke.Thickness=2
+
 task.spawn(function()
 while dot.Parent do
-local tw=TweenService:Create(dotStroke,TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=0.8})
-tw:Play()
-tw.Completed:Wait()
-local tw2=TweenService:Create(dotStroke,TweenInfo.new(1,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=0})
-tw2:Play()
-tw2.Completed:Wait()
+local tw=TweenService:Create(dotStroke,TweenInfo.new(1,Enum.EasingStyle.Sine),{Transparency=0.8})
+tw:Play() tw.Completed:Wait()
+local tw2=TweenService:Create(dotStroke,TweenInfo.new(1,Enum.EasingStyle.Sine),{Transparency=0})
+tw2:Play() tw2.Completed:Wait()
 end
 end)
+
 local tTit=Instance.new("TextLabel",ttl)
 tTit.Size=UDim2.new(0,220,1,0)
 tTit.Position=UDim2.new(0,36,0,0)
@@ -100,6 +104,7 @@ tTit.TextColor3=Color3.fromRGB(255,255,255)
 tTit.Font=Enum.Font.GothamBlack
 tTit.TextSize=16
 tTit.TextXAlignment=Enum.TextXAlignment.Left
+
 local tSub=Instance.new("TextLabel",ttl)
 tSub.Size=UDim2.new(0,200,1,0)
 tSub.Position=UDim2.new(0,150,0,0)
@@ -109,6 +114,19 @@ tSub.TextColor3=Color3.fromRGB(220,180,255)
 tSub.Font=Enum.Font.Gotham
 tSub.TextSize=12
 tSub.TextXAlignment=Enum.TextXAlignment.Left
+
+local hideBtn=Instance.new("TextButton",ttl)
+hideBtn.Size=UDim2.new(0,30,0,30)
+hideBtn.Position=UDim2.new(1,-112,0.5,-15)
+hideBtn.BackgroundColor3=Color3.fromRGB(70,60,100)
+hideBtn.Text="O"
+hideBtn.TextColor3=CT
+hideBtn.Font=Enum.Font.GothamBlack
+hideBtn.TextSize=14
+hideBtn.BorderSizePixel=0
+hideBtn.AutoButtonColor=false
+Instance.new("UICorner",hideBtn).CornerRadius=UDim.new(0,8)
+
 local minBtn=Instance.new("TextButton",ttl)
 minBtn.Size=UDim2.new(0,30,0,30)
 minBtn.Position=UDim2.new(1,-76,0.5,-15)
@@ -120,6 +138,7 @@ minBtn.TextSize=18
 minBtn.BorderSizePixel=0
 minBtn.AutoButtonColor=false
 Instance.new("UICorner",minBtn).CornerRadius=UDim.new(0,8)
+
 local cb=Instance.new("TextButton",ttl)
 cb.Size=UDim2.new(0,30,0,30)
 cb.Position=UDim2.new(1,-40,0.5,-15)
@@ -131,57 +150,92 @@ cb.TextSize=14
 cb.BorderSizePixel=0
 cb.AutoButtonColor=false
 Instance.new("UICorner",cb).CornerRadius=UDim.new(0,8)
-local cred=Instance.new("TextLabel",win)
-cred.Size=UDim2.new(1,-20,0,22)
-cred.Position=UDim2.new(0,10,1,-28)
-cred.BackgroundTransparency=1
-cred.Text="GrandGroup"
-cred.TextColor3=CA2
-cred.Font=Enum.Font.GothamBlack
-cred.TextSize=12
-cred.TextXAlignment=Enum.TextXAlignment.Center
-cred.TextTransparency=0.2
-local statusBox=Instance.new("Frame",win)
-statusBox.Size=UDim2.new(1,-20,0,75)
-statusBox.Position=UDim2.new(0,10,0,305)
-statusBox.BackgroundColor3=CE
-statusBox.BorderSizePixel=0
-Instance.new("UICorner",statusBox).CornerRadius=UDim.new(0,10)
-local statusStroke=Instance.new("UIStroke",statusBox)
-statusStroke.Color=CA
-statusStroke.Thickness=1
-statusStroke.Transparency=0.5
-local statusDot=Instance.new("Frame",statusBox)
-statusDot.Size=UDim2.new(0,8,0,8)
-statusDot.Position=UDim2.new(0,12,0,12)
-statusDot.BackgroundColor3=CTD
-statusDot.BorderSizePixel=0
-Instance.new("UICorner",statusDot).CornerRadius=UDim.new(1,0)
-local stTitle=Instance.new("TextLabel",statusBox)
-stTitle.Size=UDim2.new(1,-40,0,18)
-stTitle.Position=UDim2.new(0,26,0,7)
-stTitle.BackgroundTransparency=1
-stTitle.Text="STATUS"
-stTitle.TextColor3=CTD
-stTitle.Font=Enum.Font.GothamBold
-stTitle.TextSize=10
-stTitle.TextXAlignment=Enum.TextXAlignment.Left
-local stFarm=Instance.new("TextLabel",statusBox)
-stFarm.Size=UDim2.new(1,-24,0,45)
-stFarm.Position=UDim2.new(0,12,0,26)
-stFarm.BackgroundTransparency=1
-stFarm.Text="Parado"
-stFarm.TextColor3=CT
-stFarm.Font=Enum.Font.Gotham
-stFarm.TextSize=11
-stFarm.TextXAlignment=Enum.TextXAlignment.Left
-stFarm.TextYAlignment=Enum.TextYAlignment.Top
-stFarm.TextWrapped=true
 
 
-local function criarBotao(icone,texto,y,corA,corB)
-local b=Instance.new("TextButton",win)
-b.Size=UDim2.new(1,-20,0,48)
+local creditos=Instance.new("TextLabel",win)
+creditos.Size=UDim2.new(0,200,0,22)
+creditos.Position=UDim2.new(0,10,1,-28)
+creditos.BackgroundTransparency=1
+creditos.Text="GrandGroup v2.0"
+creditos.TextColor3=CA2
+creditos.Font=Enum.Font.GothamBlack
+creditos.TextSize=11
+creditos.TextXAlignment=Enum.TextXAlignment.Left
+creditos.TextTransparency=0.2
+
+local sidebar=Instance.new("Frame",win)
+sidebar.Size=UDim2.new(0,120,1,-58)
+sidebar.Position=UDim2.new(0,10,0,52)
+sidebar.BackgroundColor3=CB
+sidebar.BorderSizePixel=0
+Instance.new("UICorner",sidebar).CornerRadius=UDim.new(0,10)
+
+local sbList=Instance.new("UIListLayout",sidebar)
+sbList.Padding=UDim.new(0,6)
+
+local sbPad=Instance.new("UIPadding",sidebar)
+sbPad.PaddingTop=UDim.new(0,8)
+sbPad.PaddingLeft=UDim.new(0,8)
+sbPad.PaddingRight=UDim.new(0,8)
+
+local content=Instance.new("Frame",win)
+content.Size=UDim2.new(1,-150,1,-58)
+content.Position=UDim2.new(0,140,0,52)
+content.BackgroundTransparency=1
+
+local paginas={}
+local botoesAba={}
+
+local function mostrarAba(nome)
+for k,p in pairs(paginas)do p.Visible=(k==nome)end
+for k,b in pairs(botoesAba)do
+if k==nome then
+TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=CA}):Play()
+else
+TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=CE}):Play()
+end
+end
+end
+
+local function criarAba(nome,icone,titulo)
+local b=Instance.new("TextButton",sidebar)
+b.Size=UDim2.new(1,0,0,32)
+b.BackgroundColor3=CE
+b.Text="  "..icone.."  "..nome
+b.TextColor3=CT
+b.Font=Enum.Font.GothamBold
+b.TextSize=12
+b.TextXAlignment=Enum.TextXAlignment.Left
+b.BorderSizePixel=0
+b.AutoButtonColor=false
+Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
+botoesAba[nome]=b
+local p=Instance.new("Frame",content)
+p.Size=UDim2.new(1,0,1,0)
+p.BackgroundTransparency=1
+p.Visible=false
+paginas[nome]=p
+local h=Instance.new("TextLabel",p)
+h.Size=UDim2.new(1,0,0,24)
+h.BackgroundTransparency=1
+h.Text=titulo
+h.TextColor3=CT
+h.Font=Enum.Font.GothamBlack
+h.TextSize=15
+h.TextXAlignment=Enum.TextXAlignment.Left
+local line=Instance.new("Frame",p)
+line.Size=UDim2.new(1,0,0,1)
+line.Position=UDim2.new(0,0,0,26)
+line.BackgroundColor3=CA
+line.BorderSizePixel=0
+line.BackgroundTransparency=0.6
+b.MouseButton1Click:Connect(function()mostrarAba(nome)end)
+return p
+end
+
+local function criarBotao(parent,icone,texto,y,fn)
+local b=Instance.new("TextButton",parent)
+b.Size=UDim2.new(1,-20,0,42)
 b.Position=UDim2.new(0,10,0,y)
 b.BackgroundColor3=CE
 b.Text=""
@@ -199,7 +253,7 @@ ico.BackgroundTransparency=1
 ico.Text=icone
 ico.TextColor3=CT
 ico.Font=Enum.Font.GothamBold
-ico.TextSize=20
+ico.TextSize=18
 ico.TextXAlignment=Enum.TextXAlignment.Center
 local lbl=Instance.new("TextLabel",b)
 lbl.Size=UDim2.new(1,-56,1,0)
@@ -208,32 +262,286 @@ lbl.BackgroundTransparency=1
 lbl.Text=texto
 lbl.TextColor3=CT
 lbl.Font=Enum.Font.GothamBold
-lbl.TextSize=13
+lbl.TextSize=12
 lbl.TextXAlignment=Enum.TextXAlignment.Left
+b._ativo=false
+b.MouseEnter:Connect(function()
+TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=CEH}):Play()
+end)
+b.MouseLeave:Connect(function()
+if not b._ativo then
+TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=CE}):Play()
+end
+end)
+b.MouseButton1Click:Connect(fn)
 return b,lbl
 end
-local b1,l1=criarBotao("P","Pular Alto",56)
-local b2,l2=criarBotao("V","Velocidade 50",112,Color3.fromRGB(30,50,80),Color3.fromRGB(20,35,60))
-local b3,l3=criarBotao("A","Auto Farm: OFF",168,Color3.fromRGB(90,30,45),Color3.fromRGB(60,20,35))
-local b4,l4=criarBotao("F","Auto Fruta: OFF",224,Color3.fromRGB(90,30,45),Color3.fromRGB(60,20,35))
-for _,btn in ipairs({b1,b2,b3,b4})do
-btn.MouseEnter:Connect(function()
-TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=CEH}):Play()
-end)
-btn.MouseLeave:Connect(function()
-if btn==b3 and _G.autoF then return end
-if btn==b4 then return end
-TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=CE}):Play()
-end)
+
+
+local pgMain=criarAba("Main","H","Principal")
+local pgFarm=criarAba("Farm","F","Auto Farm Level")
+local pgSub=criarAba("Sub","S","Sub Farm")
+local pgRaid=criarAba("Raid","R","Auto Raid")
+local pgConfig=criarAba("Config","C","Configuracoes")
+
+local function criarStatusBox(parent,y,titulo,altura)
+local box=Instance.new("Frame",parent)
+box.Size=UDim2.new(1,-20,0,altura or 80)
+box.Position=UDim2.new(0,10,0,y)
+box.BackgroundColor3=CE
+box.BorderSizePixel=0
+Instance.new("UICorner",box).CornerRadius=UDim.new(0,10)
+local t=Instance.new("TextLabel",box)
+t.Size=UDim2.new(1,-24,0,16)
+t.Position=UDim2.new(0,12,0,8)
+t.BackgroundTransparency=1
+t.Text=titulo
+t.TextColor3=CA2
+t.TextFont=Enum.Font.GothamBlack
+t.TextSize=10
+t.TextXAlignment=Enum.TextXAlignment.Left
+local lbl=Instance.new("TextLabel",box)
+lbl.Size=UDim2.new(1,-24,0,(altura or 80)-30)
+lbl.Position=UDim2.new(0,12,0,26)
+lbl.BackgroundTransparency=1
+lbl.Text="Parado"
+lbl.TextColor3=CT
+lbl.Font=Enum.Font.Gotham
+lbl.TextSize=11
+lbl.TextXAlignment=Enum.TextXAlignment.Left
+lbl.TextYAlignment=Enum.TextYAlignment.Top
+lbl.TextWrapped=true
+return lbl
 end
-b1.MouseButton1Click:Connect(function()
+
+local bPular,bPularLbl=criarBotao(pgMain,"!","Pular Alto",40,function()
 local c=plr.Character
 if c and c:FindFirstChild("HumanoidRootPart")then c.HumanoidRootPart.Velocity=Vector3.new(0,100,0)end
 end)
-b2.MouseButton1Click:Connect(function()
+
+local bVel,bVelLbl=criarBotao(pgMain,"V","Velocidade 50",90,function()
 local c=plr.Character
 if c and c:FindFirstChild("Humanoid")then c.Humanoid.WalkSpeed=50 end
 end)
+
+local bInf,bInfLbl=criarBotao(pgMain,"+","Vida Infinita",140,function()
+local c=plr.Character
+if c and c:FindFirstChild("Humanoid")then
+c.Humanoid.MaxHealth=math.huge
+c.Humanoid.Health=math.huge
+end
+end)
+
+
+local bFarm,bFarmLbl=criarBotao(pgFarm,"F","Auto Farm: OFF",40,function()
+_G.autoF=not _G.autoF
+if _G.autoF then
+bFarmLbl.Text="Auto Farm: ON"
+bFarm._ativo=true
+bFarm.BackgroundColor3=Color3.fromRGB(30,120,40)
+_G.kC=0
+_G.missao=nil
+task.spawn(loopFarm)
+else
+bFarmLbl.Text="Auto Farm: OFF"
+bFarm._ativo=false
+bFarm.BackgroundColor3=CE
+end
+end)
+
+local stFarm=criarStatusBox(pgFarm,90,"STATUS FARM",80)
+
+local bAutoBoss,bAutoBossLbl=criarBotao(pgFarm,"B","Auto Boss: OFF",180,function()
+_G.autoBoss=not _G.autoBoss
+if _G.autoBoss then
+bAutoBossLbl.Text="Auto Boss: ON"
+bAutoBoss._ativo=true
+bAutoBoss.BackgroundColor3=Color3.fromRGB(30,120,40)
+task.spawn(loopAutoBoss)
+else
+bAutoBossLbl.Text="Auto Boss: OFF"
+bAutoBoss._ativo=false
+bAutoBoss.BackgroundColor3=CE
+end
+end)
+
+local bossBtn=Instance.new("TextButton",pgFarm)
+bossBtn.Size=UDim2.new(1,-20,0,32)
+bossBtn.Position=UDim2.new(0,10,0,230)
+bossBtn.BackgroundColor3=CEH
+bossBtn.Text="Selecionar Boss"
+bossBtn.TextColor3=CT
+bossBtn.Font=Enum.Font.GothamBold
+bossBtn.TextSize=11
+bossBtn.BorderSizePixel=0
+bossBtn.AutoButtonColor=false
+Instance.new("UICorner",bossBtn).CornerRadius=UDim.new(0,8)
+
+local bossStatus=Instance.new("TextLabel",pgFarm)
+bossStatus.Size=UDim2.new(1,-20,0,18)
+bossStatus.Position=UDim2.new(0,10,0,268)
+bossStatus.BackgroundTransparency=1
+bossStatus.Text="Nenhum boss selecionado"
+bossStatus.TextColor3=CTD
+bossStatus.Font=Enum.Font.Gotham
+bossStatus.TextSize=10
+bossStatus.TextXAlignment=Enum.TextXAlignment.Left
+
+local bossMenu=Instance.new("Frame",pgFarm)
+bossMenu.Size=UDim2.new(1,-20,0,90)
+bossMenu.Position=UDim2.new(0,10,0,290)
+bossMenu.BackgroundColor3=CB
+bossMenu.BorderSizePixel=0
+bossMenu.Visible=false
+Instance.new("UICorner",bossMenu).CornerRadius=UDim.new(0,10)
+
+local bossScroll=Instance.new("ScrollingFrame",bossMenu)
+bossScroll.Size=UDim2.new(1,-10,1,-10)
+bossScroll.Position=UDim2.new(0,5,0,5)
+bossScroll.BackgroundTransparency=1
+bossScroll.CanvasSize=UDim2.new(0,0,0,0)
+bossScroll.AutomaticCanvasSize=Enum.AutomaticSize.Y
+bossScroll.ScrollBarThickness=4
+
+local bossListLayout=Instance.new("UIListLayout",bossScroll)
+bossListLayout.Padding=UDim.new(0,4)
+
+
+local bRedeem,bRedeemLbl=criarBotao(pgSub,"$","Resgatar Todos os Codigos",40,function()
+local rem=RS:FindFirstChild("Remotes")
+if rem then rem=rem:FindFirstChild("Redeem")end
+if not rem then
+stSub.Text="Redeem remote nao encontrado"
+return
+end
+local codigos={
+"EASTEREXP","LIGHTNINGABUSE","1LOSTADMIN","ADMINFIGHT",
+"kittgaming","KITT_RESET","DRAGONABUSE","Sub2CaptainMaui",
+"CHANDLER","CODE_SERVICIO","DEVSCOOKING","Sub2Fer999",
+"Enyu_is_Pro","Magicbus","JCWK","Starcodeheo",
+"Bluxxy","fudd10_v2","SUB2GAMERROBOT_EXP1","THEGREATACE",
+"Axiore","TantaiGaming","Fudd10","STRAWHATMAINE",
+"BIGNEWS","SUB2UNCLEEKIZARU","SUB2NOOBMASTER123","Sub2Daigrock"
+}
+local sucessos=0
+for _,codigo in ipairs(codigos)do
+pcall(function()rem:InvokeServer(codigo)end)
+sucessos=sucessos+1
+stSub.Text="Resgatando: "..codigo.." ("..sucessos.."/"..#codigos..")"
+task.wait(0.4)
+end
+stSub.Text="Resgate finalizado! "..sucessos.."/"..#codigos
+end)
+
+local stSub=criarStatusBox(pgSub,90,"STATUS SUB FARM",60)
+
+local bSub,bSubLbl=criarBotao(pgSub,"S","Sub Farm: OFF",160,function()
+_G.subFarm=not _G.subFarm
+if _G.subFarm then
+bSubLbl.Text="Sub Farm: ON"
+bSub._ativo=true
+bSub.BackgroundColor3=Color3.fromRGB(30,120,40)
+else
+bSubLbl.Text="Sub Farm: OFF"
+bSub._ativo=false
+bSub.BackgroundColor3=CE
+end
+end)
+
+local bRaid,bRaidLbl=criarBotao(pgRaid,"R","Auto Raid: OFF",40,function()
+_G.raid=not _G.raid
+if _G.raid then
+bRaidLbl.Text="Auto Raid: ON"
+bRaid._ativo=true
+bRaid.BackgroundColor3=Color3.fromRGB(30,120,40)
+else
+bRaidLbl.Text="Auto Raid: OFF"
+bRaid._ativo=false
+bRaid.BackgroundColor3=CE
+end
+end)
+
+local stRaid=criarStatusBox(pgRaid,90,"STATUS RAID",60)
+
+local configInfo=Instance.new("Frame",pgConfig)
+configInfo.Size=UDim2.new(1,-20,0,60)
+configInfo.Position=UDim2.new(0,10,0,40)
+configInfo.BackgroundColor3=CE
+configInfo.BorderSizePixel=0
+Instance.new("UICorner",configInfo).CornerRadius=UDim.new(0,10)
+
+local cName=Instance.new("TextLabel",configInfo)
+cName.Size=UDim2.new(1,-20,0,22)
+cName.Position=UDim2.new(0,14,0,10)
+cName.BackgroundTransparency=1
+cName.Text="Gravity Hub"
+cName.TextColor3=CT
+cName.Font=Enum.Font.GothamBlack
+cName.TextSize=15
+cName.TextXAlignment=Enum.TextXAlignment.Left
+
+local cVer=Instance.new("TextLabel",configInfo)
+cVer.Size=UDim2.new(1,-20,0,18)
+cVer.Position=UDim2.new(0,14,0,32)
+cVer.BackgroundTransparency=1
+cVer.Text="Versao 2.0 - GrandGroup"
+cVer.TextColor3=CTD
+cVer.Font=Enum.Font.Gotham
+cVer.TextSize=11
+cVer.TextXAlignment=Enum.TextXAlignment.Left
+
+local configCredits=Instance.new("Frame",pgConfig)
+configCredits.Size=UDim2.new(1,-20,0,90)
+configCredits.Position=UDim2.new(0,10,0,110)
+configCredits.BackgroundColor3=CE
+configCredits.BorderSizePixel=0
+Instance.new("UICorner",configCredits).CornerRadius=UDim.new(0,10)
+local credStroke=Instance.new("UIStroke",configCredits)
+credStroke.Color=CA
+credStroke.Thickness=1
+credStroke.Transparency=0.5
+
+local credTitle=Instance.new("TextLabel",configCredits)
+credTitle.Size=UDim2.new(1,-20,0,18)
+credTitle.Position=UDim2.new(0,10,0,8)
+credTitle.BackgroundTransparency=1
+credTitle.Text="CREDITOS"
+credTitle.TextColor3=CA2
+credTitle.Font=Enum.Font.GothamBlack
+credTitle.TextSize=10
+credTitle.TextXAlignment=Enum.TextXAlignment.Left
+
+local credMain=Instance.new("TextLabel",configCredits)
+credMain.Size=UDim2.new(1,-20,0,26)
+credMain.Position=UDim2.new(0,10,0,30)
+credMain.BackgroundTransparency=1
+credMain.Text="GrandGroup"
+credMain.TextColor3=CA2
+credMain.Font=Enum.Font.GothamBlack
+credMain.TextSize=18
+credMain.TextXAlignment=Enum.TextXAlignment.Center
+
+local credSub=Instance.new("TextLabel",configCredits)
+credSub.Size=UDim2.new(1,-20,0,20)
+credSub.Position=UDim2.new(0,10,0,60)
+credSub.BackgroundTransparency=1
+credSub.Text="Todos os direitos reservados 2025"
+credSub.TextColor3=CTD
+credSub.Font=Enum.Font.Gotham
+credSub.TextSize=10
+credSub.TextXAlignment=Enum.TextXAlignment.Center
+
+
+hideBtn.MouseEnter:Connect(function()
+TweenService:Create(hideBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(100,80,140)}):Play()
+end)
+hideBtn.MouseLeave:Connect(function()
+TweenService:Create(hideBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(70,60,100)}):Play()
+end)
+hideBtn.MouseButton1Click:Connect(function()
+win.Visible=not win.Visible
+end)
+
 minBtn.MouseEnter:Connect(function()
 TweenService:Create(minBtn,TweenInfo.new(0.15),{BackgroundColor3=CA}):Play()
 end)
@@ -246,29 +554,26 @@ end)
 cb.MouseLeave:Connect(function()
 TweenService:Create(cb,TweenInfo.new(0.15),{BackgroundColor3=CR}):Play()
 end)
+
 minBtn.MouseButton1Click:Connect(function()
 minimizado=not minimizado
 if minimizado then
-TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,460,0,48)}):Play()
-statusBox.Visible=false
-b1.Visible=false
-b2.Visible=false
-b3.Visible=false
-b4.Visible=false
-cred.Visible=false
+TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,540,0,48)}):Play()
+sidebar.Visible=false
+content.Visible=false
+creditos.Visible=false
 minBtn.Text="+"
 else
-TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,460,0,430)}):Play()
-statusBox.Visible=true
-b1.Visible=true
-b2.Visible=true
-b3.Visible=true
-b4.Visible=true
-cred.Visible=true
+TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,540,0,400)}):Play()
+sidebar.Visible=true
+content.Visible=true
+creditos.Visible=true
 minBtn.Text="-"
 end
 end)
+
 cb.MouseButton1Click:Connect(function() sg:Destroy() end)
+
 local arr=false
 local im,ip
 ttl.InputBegan:Connect(function(input)
@@ -285,6 +590,7 @@ local d=input.Position-im
 win.Position=UDim2.new(ip.X.Scale,ip.X.Offset+d.X,ip.Y.Scale,ip.Y.Offset+d.Y)
 end
 end)
+
 local NPCs={
 BanditQuest1=Vector3.new(1060,16,1547),
 JungleQuest=Vector3.new(-1601,36,153),
@@ -333,6 +639,7 @@ TikiQuest3=Vector3.new(-16585,205,-11530),
 SubmergedQuest1=Vector3.new(-39231,110,-2305),
 SubmergedQuest2=Vector3.new(-39733,110,-2113),
 SubmergedQuest3=Vector3.new(-40295,110,-1987)}
+
 local quests={
 {L=1,M="Bandit",QN="BanditQuest1",QL=1,KL=5},
 {L=10,M="Monkey",QN="JungleQuest",QL=1,KL=6},
@@ -426,16 +733,19 @@ local quests={
 {L=2675,M="Ocean Prophet",QN="SubmergedQuest2",QL=2,KL=5},
 {L=2700,M="High Disciple",QN="SubmergedQuest3",QL=1,KL=5},
 {L=2725,M="Grand Devotee",QN="SubmergedQuest3",QL=2,KL=5}}
+
 local ES={"Combat","Black Leg","Electro","Fishman Karate","Superhuman","Death Step","Sharkman Karate","Electric Claw","Dragon Talon","Godhuman","Sanguine Art","Dragon Breath"}
 
 local function gLvl()
 local d=plr:FindFirstChild("Data")
 if d and d:FindFirstChild("Level")then return d.Level.Value end
 return 1 end
+
 local function gQ(lv)
 local q=quests[1]
 for _,v in ipairs(quests)do if v.L<=lv then q=v else break end end
 return q end
+
 local function lerProgressoQuest()
 local d=plr:FindFirstChild("Data")
 if not d then return 0,0 end
@@ -445,6 +755,7 @@ local k=q:FindFirstChild("Kills")
 local r=q:FindFirstChild("Requirement")
 if k and r then return k.Value,r.Value end
 return 0,0 end
+
 local function voarPara(destino,vel,alturaVoo)
 vel=vel or 275
 alturaVoo=alturaVoo or 70
@@ -529,6 +840,7 @@ end
 end
 if bp.Parent then bp:Destroy() end
 return true end
+
 local function encontrarAlvo(nome)
 local c=plr.Character
 if not c or not c:FindFirstChild("HumanoidRootPart")then return nil end
@@ -554,6 +866,7 @@ local d=(h.Position-pos).Magnitude
 if d<bd then bd=d best=o end
 end end end
 return best end
+
 local function encontrarEstilo()
 local bp=plr:FindFirstChild("Backpack")
 if not bp then return nil end
@@ -565,6 +878,7 @@ end
 end
 end
 return nil end
+
 local function equipar()
 local c=plr.Character
 if not c then return nil end
@@ -585,6 +899,7 @@ local chk=c:FindFirstChild(f.Name)
 if chk and chk:IsA("Tool")then return f.Name end
 end
 return f.Name end
+
 local function atacarComDano(alvo)
 local c=plr.Character
 if not c then return end
@@ -604,6 +919,7 @@ if u.Health>=u.MaxHealth then
 pcall(function() u:TakeDamage(5) end)
 end
 end
+
 local function garantirEstilo()
 local c=plr.Character
 if not c then return end
@@ -616,7 +932,126 @@ end
 equipar()
 end
 
-local function loopFarm()
+local bossList={
+{Name="Gorilla King",Level=25,Island="Jungle",Model="Gorilla King"},
+{Name="Bobby",Level=55,Island="Pirate Village",Model="Bobby"},
+{Name="The Saw",Level=100,Island="Middle Town",Model="The Saw"},
+{Name="Yeti",Level=110,Island="Frozen Village",Model="Yeti"},
+{Name="Mob Leader",Level=120,Island="Mob Leader Island",Model="Mob Leader"},
+{Name="Vice Admiral",Level=130,Island="Marine Fortress",Model="Vice Admiral"},
+{Name="Saber Expert",Level=200,Island="Jungle",Model="Saber Expert"},
+{Name="Warden",Level=220,Island="Prison",Model="Warden"},
+{Name="Chief Warden",Level=230,Island="Prison",Model="Chief Warden"},
+{Name="Swan",Level=240,Island="Prison",Model="Swan"},
+{Name="Magma Admiral",Level=350,Island="Magma Village",Model="Magma Admiral"},
+{Name="Fishman Lord",Level=425,Island="Underwater City",Model="Fishman Lord"},
+{Name="Wysper",Level=500,Island="Upper Skylands",Model="Wysper"},
+{Name="Thunder God",Level=575,Island="Upper Skylands",Model="Thunder God"},
+{Name="Cyborg",Level=675,Island="Fountain City",Model="Cyborg"},
+{Name="Ice Admiral",Level=700,Island="Frozen Village",Model="Ice Admiral"},
+{Name="Diamond",Level=750,Island="Kingdom of Rose",Model="Diamond"},
+{Name="Jeremy",Level=850,Island="Kingdom of Rose",Model="Jeremy"},
+{Name="Fajita",Level=925,Island="Green Zone",Model="Fajita"},
+{Name="Don Swan",Level=1000,Island="Swan Mansion",Model="Don Swan"},
+{Name="Darkbeard",Level=1000,Island="Dark Arena",Model="Darkbeard"},
+{Name="Smoke Admiral",Level=1150,Island="Hot and Cold",Model="Smoke Admiral"},
+{Name="Cursed Captain",Level=1325,Island="Cursed Ship",Model="Cursed Captain"},
+{Name="Awakened Ice Admiral",Level=1400,Island="Ice Castle",Model="Awakened Ice Admiral"},
+{Name="Tide Keeper",Level=1475,Island="Forgotten Island",Model="Tide Keeper"},
+{Name="Stone",Level=1550,Island="Port Town",Model="Stone"},
+{Name="Hydra Enforcer",Level=1575,Island="Hydra Island",Model="Hydra Enforcer"},
+{Name="Island Empress",Level=1650,Island="Hydra Island",Model="Island Empress"},
+{Name="Kilo Admiral",Level=1750,Island="Great Tree",Model="Kilo Admiral"},
+{Name="Captain Elephant",Level=1825,Island="Floating Turtle",Model="Captain Elephant"},
+{Name="Beautiful Pirate",Level=1900,Island="Floating Turtle",Model="Beautiful Pirate"},
+{Name="Longma",Level=2000,Island="Floating Turtle",Model="Longma"},
+{Name="Soul Reaper",Level=2100,Island="Haunted Castle",Model="Soul Reaper"},
+{Name="Cake Queen",Level=2175,Island="Sea of Treats",Model="Cake Queen"},
+{Name="Dough King",Level=2300,Island="Dough Kingdom",Model="Dough King"},
+{Name="Rip_Indra",Level=5000,Island="Castle on the Sea",Model="Rip_Indra"}}
+
+local function bossVivo(nomeModel)
+for _,obj in ipairs(workspace:GetDescendants())do
+if obj:IsA("Model")and obj.Name:lower():find(nomeModel:lower(),1,true)then
+local hum=obj:FindFirstChildOfClass("Humanoid")
+if hum and hum.Health>0 then return obj end
+end
+end
+return nil end
+
+local function atualizarListaBoss()
+for _,b in ipairs(bossScroll:GetChildren())do
+if b:IsA("TextButton")then b:Destroy()end
+end
+local encontrados=0
+for _,boss in ipairs(bossList)do
+local obj=bossVivo(boss.Model)
+if obj then
+encontrados=encontrados+1
+local btn=Instance.new("TextButton",bossScroll)
+btn.Size=UDim2.new(1,-8,0,26)
+btn.BackgroundColor3=CE
+btn.Text="  "..boss.Name.." - Nv "..boss.Level.." ("..boss.Island..")"
+btn.TextColor3=CT
+btn.Font=Enum.Font.Gotham
+btn.TextSize=10
+btn.TextXAlignment=Enum.TextXAlignment.Left
+btn.BorderSizePixel=0
+Instance.new("UICorner",btn).CornerRadius=UDim.new(0,6)
+btn.MouseButton1Click:Connect(function()
+_G.bossSelecionado=boss
+bossStatus.Text="Selecionado: "..boss.Name
+bossMenu.Visible=false
+end)
+end
+end
+if encontrados==0 then
+local lbl=Instance.new("TextLabel",bossScroll)
+lbl.Size=UDim2.new(1,-8,0,40)
+lbl.BackgroundTransparency=1
+lbl.Text="Nenhum boss spawnado. Server hop!"
+lbl.TextColor3=CTD
+lbl.Font=Enum.Font.Gotham
+lbl.TextSize=10
+lbl.TextWrapped=true
+end
+end
+
+bossBtn.MouseButton1Click:Connect(function()
+atualizarListaBoss()
+bossMenu.Visible=not bossMenu.Visible
+end)
+
+local function loopAutoBoss()
+while _G.autoBoss do
+if _G.bossSelecionado then
+local obj=bossVivo(_G.bossSelecionado.Model)
+if obj then
+local h=obj:FindFirstChild("HumanoidRootPart")
+local u=obj:FindFirstChildOfClass("Humanoid")
+if h and u and u.Health>0 then
+local c=plr.Character
+if c and c:FindFirstChild("HumanoidRootPart")then
+voarPara(h.Position+Vector3.new(0,10,0),275,30)
+local hum=c:FindFirstChildOfClass("Humanoid")
+if hum then hum.PlatformStand=true end
+equipar()
+for _=1,5 do
+atacarComDano(obj)
+task.wait(0.05)
+end
+stFarm.Text="Boss: ".._G.bossSelecionado.Name.." | HP "..math.floor(u.Health)
+end
+end
+else
+stFarm.Text="Procurando boss ".._G.bossSelecionado.Name
+end
+end
+task.wait(0.5)
+end
+end
+
+function loopFarm()
 while _G.autoF do
 local c=plr.Character
 if c and c:FindFirstChild("HumanoidRootPart")and c:FindFirstChildOfClass("Humanoid")then
@@ -641,7 +1076,6 @@ if kAtual==0 then kAtual=_G.kC end
 if kNec==0 then kNec=q.KL or 5 end
 if kAtual>=kNec and kNec>0 then
 stFarm.Text="Missao completa! ("..kAtual.."/"..kNec..")"
-statusDot.BackgroundColor3=CG
 _G.missao=nil
 _G.kC=0
 task.wait(2)
@@ -678,7 +1112,9 @@ if not _G.autoF or not h.Parent or not hrp.Parent then return end
 bp.Position=h.Position+Vector3.new(0,10,0)
 bg.CFrame=CFrame.new(hrp.Position,h.Position)
 hrp.Velocity=Vector3.new(0,0,0)
-if hum.Parent then hum.PlatformStand=true end
+if hum.Parent then
+hum.PlatformStand=true
+end
 garantirEstilo()
 end)
 local connAtk
@@ -718,20 +1154,15 @@ task.wait(0.1)
 end
 stFarm.Text="Parado"
 end
-b3.MouseButton1Click:Connect(function()
-_G.autoF=not _G.autoF
-if _G.autoF then
-l3.Text="Auto Farm: ON"
-b3.BackgroundColor3=Color3.fromRGB(30,120,40)
-statusDot.BackgroundColor3=CG
-_G.kC=0
-_G.missao=nil
-task.spawn(loopFarm)
-else
-l3.Text="Auto Farm: OFF"
-b3.BackgroundColor3=CE
-statusDot.BackgroundColor3=CTD
+
+task.spawn(function()
+while sg.Parent do
+if bossMenu.Visible then atualizarListaBoss()end
+task.wait(10)
 end
 end)
-print("=== Gravity Hub GrandGroup OK ===")
+
+mostrarAba("Main")
+
+print("=== Gravity Hub GrandGroup v2.0 OK ===")
 

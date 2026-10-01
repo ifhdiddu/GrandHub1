@@ -1,936 +1,855 @@
-local plr=game:GetService("Players").LocalPlayer
-local RS=game:GetService("ReplicatedStorage")
-local RunService=game:GetService("RunService")
-local pg=plr:WaitForChild("PlayerGui")
-local VIM=game:GetService("VirtualUser")
-local TweenService=game:GetService("TweenService")
-local UIS=game:GetService("UserInputService")
+-- ============================================================
+-- GRAVITY HUB v3.0 | Blox Fruits | GrandGroup
+-- Sistema: Farm, Raid, Fruit Sniper, CDK/TTK/Soul, ESP
+-- ============================================================
 
-for _,g in ipairs(pg:GetChildren())do if g:IsA("ScreenGui")and(g.Name=="GravityHub"or g.Name=="MiniHub"or g.Name=="MeuMenu")then g:Destroy()end end
+local plr = game:GetService("Players").LocalPlayer
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local VIM = game:GetService("VirtualUser")
+local pg = plr:WaitForChild("PlayerGui")
 
-_G.autoF=false
-_G.subFarm=false
-_G.raid=false
-_G.autoBoss=false
-_G.bossSelecionado=nil
-_G.kC=0
-_G.missao=nil
-_G.uT=0
+for _, g in ipairs(pg:GetChildren()) do
+    if g:IsA("ScreenGui") and (g.Name == "GravityHub" or g.Name == "MeuMenu" or g.Name == "MiniHub") then
+        g:Destroy()
+    end
+end
 
-local CF=Color3.fromRGB(14,14,20)
-local CB=Color3.fromRGB(20,20,30)
-local CE=Color3.fromRGB(28,28,40)
-local CEH=Color3.fromRGB(42,42,60)
-local CA=Color3.fromRGB(155,89,255)
-local CA2=Color3.fromRGB(255,120,255)
-local CT=Color3.fromRGB(245,245,255)
-local CTD=Color3.fromRGB(140,140,165)
-local CR=Color3.fromRGB(255,80,100)
-local CG=Color3.fromRGB(80,220,120)
+-- ========== ESTADO ==========
+_G.autoFarm = false
+_G.autoBoss = false
+_G.autoRaid = false
+_G.autoFruit = false
+_G.espFruits = false
+_G.fruitSniper = false
+_G.autoCDK = false
+_G.autoTTK = false
+_G.autoSoul = false
+_G.killCount = 0
+_G.currentQuest = nil
+_G.selectedBoss = nil
+_G.lastQuestAttempt = 0
+_G.farmSpeed = 275
 
-local sg=Instance.new("ScreenGui")
-sg.Name="GravityHub"
-sg.ResetOnSpawn=false
-sg.IgnoreGuiInset=true
-sg.Parent=pg
+-- ========== TEMA ==========
+local C = {
+    bg = Color3.fromRGB(12, 12, 18),
+    panel = Color3.fromRGB(20, 20, 30),
+    element = Color3.fromRGB(28, 28, 40),
+    hover = Color3.fromRGB(42, 42, 60),
+    accent = Color3.fromRGB(155, 89, 255),
+    accent2 = Color3.fromRGB(255, 120, 255),
+    text = Color3.fromRGB(245, 245, 255),
+    textDim = Color3.fromRGB(140, 140, 165),
+    red = Color3.fromRGB(255, 80, 100),
+    green = Color3.fromRGB(80, 220, 120),
+    yellow = Color3.fromRGB(255, 200, 60),
+    blue = Color3.fromRGB(80, 180, 255),
+}
 
-local win=Instance.new("Frame",sg)
-win.Size=UDim2.new(0,540,0,400)
-win.Position=UDim2.new(0.5,-270,0.5,-200)
-win.BackgroundColor3=CF
-win.BorderSizePixel=0
-Instance.new("UICorner",win).CornerRadius=UDim.new(0,16)
+-- ========== JANELA ==========
+local sg = Instance.new("ScreenGui")
+sg.Name = "GravityHub"
+sg.ResetOnSpawn = false
+sg.IgnoreGuiInset = true
+sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+sg.Parent = pg
 
-local ws=Instance.new("UIStroke",win)
-ws.Color=CA
-ws.Thickness=1.5
-ws.Transparency=0.4
+local win = Instance.new("Frame", sg)
+win.Size = UDim2.new(0, 600, 0, 440)
+win.Position = UDim2.new(0.5, -300, 0.5, -220)
+win.BackgroundColor3 = C.bg
+win.BorderSizePixel = 0
+win.Active = true
+Instance.new("UICorner", win).CornerRadius = UDim.new(0, 14)
 
-local gl=Instance.new("UIGradient",ws)
-gl.Color=ColorSequence.new({
-ColorSequenceKeypoint.new(0,Color3.fromRGB(155,89,255)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,120,255)),
-ColorSequenceKeypoint.new(1,Color3.fromRGB(100,200,255))
+local winStroke = Instance.new("UIStroke", win)
+winStroke.Color = C.accent
+winStroke.Thickness = 1.5
+winStroke.Transparency = 0.4
+
+local gradient = Instance.new("UIGradient", winStroke)
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(155, 89, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 120, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 180, 255))
 })
-gl.Rotation=45
+gradient.Rotation = 45
 
 task.spawn(function()
-while sg.Parent do
-gl.Rotation=gl.Rotation+2
-task.wait(0.05)
-end
+    while sg.Parent do
+        gradient.Rotation = gradient.Rotation + 2
+        task.wait(0.05)
+    end
 end)
 
-local minimizado=false
+-- ========== TITLE BAR ==========
+local titleBar = Instance.new("Frame", win)
+titleBar.Size = UDim2.new(1, 0, 0, 46)
+titleBar.BackgroundColor3 = C.panel
+titleBar.BorderSizePixel = 0
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 14)
 
-local ttl=Instance.new("Frame",win)
-ttl.Size=UDim2.new(1,0,0,48)
-ttl.BackgroundColor3=CB
-ttl.BorderSizePixel=0
-Instance.new("UICorner",ttl).CornerRadius=UDim.new(0,16)
+local titleFix = Instance.new("Frame", titleBar)
+titleFix.Size = UDim2.new(1, 0, 0, 14)
+titleFix.Position = UDim2.new(0, 0, 1, -14)
+titleFix.BackgroundColor3 = C.panel
+titleFix.BorderSizePixel = 0
 
-local tf=Instance.new("Frame",ttl)
-tf.Size=UDim2.new(1,0,0,15)
-tf.Position=UDim2.new(0,0,1,-15)
-tf.BackgroundColor3=CB
-tf.BorderSizePixel=0
+local titleDot = Instance.new("Frame", titleBar)
+titleDot.Size = UDim2.new(0, 12, 0, 12)
+titleDot.Position = UDim2.new(0, 16, 0.5, -6)
+titleDot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+titleDot.BorderSizePixel = 0
+Instance.new("UICorner", titleDot).CornerRadius = UDim.new(1, 0)
 
-local dot=Instance.new("Frame",ttl)
-dot.Size=UDim2.new(0,12,0,12)
-dot.Position=UDim2.new(0,16,0.5,-6)
-dot.BackgroundColor3=Color3.fromRGB(255,255,255)
-dot.BorderSizePixel=0
-Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
+local dotStroke = Instance.new("UIStroke", titleDot)
+dotStroke.Color = Color3.fromRGB(255, 200, 255)
+dotStroke.Thickness = 2
 
-local dotStroke=Instance.new("UIStroke",dot)
-dotStroke.Color=Color3.fromRGB(255,200,255)
-dotStroke.Thickness=2
+local titleText = Instance.new("TextLabel", titleBar)
+titleText.Size = UDim2.new(0, 220, 1, 0)
+titleText.Position = UDim2.new(0, 36, 0, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "GRAVITY HUB"
+titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleText.Font = Enum.Font.GothamBlack
+titleText.TextSize = 16
+titleText.TextXAlignment = Enum.TextXAlignment.Left
 
-task.spawn(function()
-while dot.Parent do
-local tw=TweenService:Create(dotStroke,TweenInfo.new(1,Enum.EasingStyle.Sine),{Transparency=0.8})
-tw:Play() tw.Completed:Wait()
-local tw2=TweenService:Create(dotStroke,TweenInfo.new(1,Enum.EasingStyle.Sine),{Transparency=0})
-tw2:Play() tw2.Completed:Wait()
-end
-end)
+local titleSub = Instance.new("TextLabel", titleBar)
+titleSub.Size = UDim2.new(0, 200, 1, 0)
+titleSub.Position = UDim2.new(0, 150, 0, 0)
+titleSub.BackgroundTransparency = 1
+titleSub.Text = "  • Blox Fruits"
+titleSub.TextColor3 = Color3.fromRGB(220, 180, 255)
+titleSub.Font = Enum.Font.Gotham
+titleSub.TextSize = 12
+titleSub.TextXAlignment = Enum.TextXAlignment.Left
 
-local tTit=Instance.new("TextLabel",ttl)
-tTit.Size=UDim2.new(0,220,1,0)
-tTit.Position=UDim2.new(0,36,0,0)
-tTit.BackgroundTransparency=1
-tTit.Text="GRAVITY HUB"
-tTit.TextColor3=Color3.fromRGB(255,255,255)
-tTit.Font=Enum.Font.GothamBlack
-tTit.TextSize=16
-tTit.TextXAlignment=Enum.TextXAlignment.Left
+local hideBtn = Instance.new("TextButton", titleBar)
+hideBtn.Size = UDim2.new(0, 30, 0, 30)
+hideBtn.Position = UDim2.new(1, -112, 0.5, -15)
+hideBtn.BackgroundColor3 = Color3.fromRGB(70, 60, 100)
+hideBtn.Text = "👁"
+hideBtn.TextColor3 = C.text
+hideBtn.Font = Enum.Font.GothamBold
+hideBtn.TextSize = 14
+hideBtn.BorderSizePixel = 0
+hideBtn.AutoButtonColor = false
+Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(0, 8)
 
-local tSub=Instance.new("TextLabel",ttl)
-tSub.Size=UDim2.new(0,200,1,0)
-tSub.Position=UDim2.new(0,150,0,0)
-tSub.BackgroundTransparency=1
-tSub.Text="  - Blox Fruits"
-tSub.TextColor3=Color3.fromRGB(220,180,255)
-tSub.Font=Enum.Font.Gotham
-tSub.TextSize=12
-tSub.TextXAlignment=Enum.TextXAlignment.Left
+local minBtn = Instance.new("TextButton", titleBar)
+minBtn.Size = UDim2.new(0, 30, 0, 30)
+minBtn.Position = UDim2.new(1, -76, 0.5, -15)
+minBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+minBtn.Text = "-"
+minBtn.TextColor3 = C.text
+minBtn.Font = Enum.Font.GothamBlack
+minBtn.TextSize = 18
+minBtn.BorderSizePixel = 0
+minBtn.AutoButtonColor = false
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 8)
 
-local hideBtn=Instance.new("TextButton",ttl)
-hideBtn.Size=UDim2.new(0,30,0,30)
-hideBtn.Position=UDim2.new(1,-112,0.5,-15)
-hideBtn.BackgroundColor3=Color3.fromRGB(70,60,100)
-hideBtn.Text="O"
-hideBtn.TextColor3=CT
-hideBtn.Font=Enum.Font.GothamBlack
-hideBtn.TextSize=14
-hideBtn.BorderSizePixel=0
-hideBtn.AutoButtonColor=false
-Instance.new("UICorner",hideBtn).CornerRadius=UDim.new(0,8)
+local closeBtn = Instance.new("TextButton", titleBar)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -40, 0.5, -15)
+closeBtn.BackgroundColor3 = C.red
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBlack
+closeBtn.TextSize = 14
+closeBtn.BorderSizePixel = 0
+closeBtn.AutoButtonColor = false
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
 
-local minBtn=Instance.new("TextButton",ttl)
-minBtn.Size=UDim2.new(0,30,0,30)
-minBtn.Position=UDim2.new(1,-76,0.5,-15)
-minBtn.BackgroundColor3=Color3.fromRGB(45,45,65)
-minBtn.Text="-"
-minBtn.TextColor3=CT
-minBtn.Font=Enum.Font.GothamBlack
-minBtn.TextSize=18
-minBtn.BorderSizePixel=0
-minBtn.AutoButtonColor=false
-Instance.new("UICorner",minBtn).CornerRadius=UDim.new(0,8)
+-- ========== SIDEBAR ==========
+local sidebar = Instance.new("Frame", win)
+sidebar.Size = UDim2.new(0, 130, 1, -58)
+sidebar.Position = UDim2.new(0, 10, 0, 52)
+sidebar.BackgroundColor3 = C.panel
+sidebar.BorderSizePixel = 0
+Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 10)
 
-local cb=Instance.new("TextButton",ttl)
-cb.Size=UDim2.new(0,30,0,30)
-cb.Position=UDim2.new(1,-40,0.5,-15)
-cb.BackgroundColor3=CR
-cb.Text="X"
-cb.TextColor3=Color3.fromRGB(255,255,255)
-cb.Font=Enum.Font.GothamBlack
-cb.TextSize=14
-cb.BorderSizePixel=0
-cb.AutoButtonColor=false
-Instance.new("UICorner",cb).CornerRadius=UDim.new(0,8)
+local sidebarList = Instance.new("UIListLayout", sidebar)
+sidebarList.Padding = UDim.new(0, 5)
 
+local sidebarPad = Instance.new("UIPadding", sidebar)
+sidebarPad.PaddingTop = UDim.new(0, 8)
+sidebarPad.PaddingLeft = UDim.new(0, 8)
+sidebarPad.PaddingRight = UDim.new(0, 8)
 
-local creditos=Instance.new("TextLabel",win)
-creditos.Size=UDim2.new(0,200,0,22)
-creditos.Position=UDim2.new(0,10,1,-28)
-creditos.BackgroundTransparency=1
-creditos.Text="GrandGroup v2.0"
-creditos.TextColor3=CA2
-creditos.Font=Enum.Font.GothamBlack
-creditos.TextSize=11
-creditos.TextXAlignment=Enum.TextXAlignment.Left
-creditos.TextTransparency=0.2
+-- ========== CONTEÚDO ==========
+local content = Instance.new("Frame", win)
+content.Size = UDim2.new(1, -160, 1, -58)
+content.Position = UDim2.new(0, 150, 0, 52)
+content.BackgroundTransparency = 1
 
-local sidebar=Instance.new("Frame",win)
-sidebar.Size=UDim2.new(0,120,1,-58)
-sidebar.Position=UDim2.new(0,10,0,52)
-sidebar.BackgroundColor3=CB
-sidebar.BorderSizePixel=0
-Instance.new("UICorner",sidebar).CornerRadius=UDim.new(0,10)
+-- ========== CRÉDITOS ==========
+local credits = Instance.new("TextLabel", win)
+credits.Size = UDim2.new(0, 200, 0, 22)
+credits.Position = UDim2.new(0, 10, 1, -28)
+credits.BackgroundTransparency = 1
+credits.Text = "GrandGroup v3.0"
+credits.TextColor3 = C.accent2
+credits.Font = Enum.Font.GothamBlack
+credits.TextSize = 11
+credits.TextXAlignment = Enum.TextXAlignment.Left
+credits.TextTransparency = 0.2
 
-local sbList=Instance.new("UIListLayout",sidebar)
-sbList.Padding=UDim.new(0,6)
-
-local sbPad=Instance.new("UIPadding",sidebar)
-sbPad.PaddingTop=UDim.new(0,8)
-sbPad.PaddingLeft=UDim.new(0,8)
-sbPad.PaddingRight=UDim.new(0,8)
-
-local content=Instance.new("Frame",win)
-content.Size=UDim2.new(1,-150,1,-58)
-content.Position=UDim2.new(0,140,0,52)
-content.BackgroundTransparency=1
-
-local paginas={}
-local botoesAba={}
+-- ========== SISTEMA DE ABAS ==========
+local paginas = {}
+local botoesAba = {}
 
 local function mostrarAba(nome)
-for k,p in pairs(paginas)do p.Visible=(k==nome)end
-for k,b in pairs(botoesAba)do
-if k==nome then
-TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=CA}):Play()
-else
-TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=CE}):Play()
-end
-end
-end
-
-local function criarAba(nome,icone,titulo)
-local b=Instance.new("TextButton",sidebar)
-b.Size=UDim2.new(1,0,0,32)
-b.BackgroundColor3=CE
-b.Text="  "..icone.."  "..nome
-b.TextColor3=CT
-b.Font=Enum.Font.GothamBold
-b.TextSize=12
-b.TextXAlignment=Enum.TextXAlignment.Left
-b.BorderSizePixel=0
-b.AutoButtonColor=false
-Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
-botoesAba[nome]=b
-local p=Instance.new("Frame",content)
-p.Size=UDim2.new(1,0,1,0)
-p.BackgroundTransparency=1
-p.Visible=false
-paginas[nome]=p
-local h=Instance.new("TextLabel",p)
-h.Size=UDim2.new(1,0,0,24)
-h.BackgroundTransparency=1
-h.Text=titulo
-h.TextColor3=CT
-h.Font=Enum.Font.GothamBlack
-h.TextSize=15
-h.TextXAlignment=Enum.TextXAlignment.Left
-local line=Instance.new("Frame",p)
-line.Size=UDim2.new(1,0,0,1)
-line.Position=UDim2.new(0,0,0,26)
-line.BackgroundColor3=CA
-line.BorderSizePixel=0
-line.BackgroundTransparency=0.6
-b.MouseButton1Click:Connect(function()mostrarAba(nome)end)
-return p
+    for k, p in pairs(paginas) do p.Visible = (k == nome) end
+    for k, b in pairs(botoesAba) do
+        if k == nome then
+            TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = C.accent}):Play()
+        else
+            TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = C.element}):Play()
+        end
+    end
 end
 
-local function criarBotao(parent,icone,texto,y,fn)
-local b=Instance.new("TextButton",parent)
-b.Size=UDim2.new(1,-20,0,42)
-b.Position=UDim2.new(0,10,0,y)
-b.BackgroundColor3=CE
-b.Text=""
-b.BorderSizePixel=0
-b.AutoButtonColor=false
-Instance.new("UICorner",b).CornerRadius=UDim.new(0,10)
-local str=Instance.new("UIStroke",b)
-str.Color=CA
-str.Thickness=1
-str.Transparency=0.7
-local ico=Instance.new("TextLabel",b)
-ico.Size=UDim2.new(0,40,1,0)
-ico.Position=UDim2.new(0,6,0,0)
-ico.BackgroundTransparency=1
-ico.Text=icone
-ico.TextColor3=CT
-ico.Font=Enum.Font.GothamBold
-ico.TextSize=18
-ico.TextXAlignment=Enum.TextXAlignment.Center
-local lbl=Instance.new("TextLabel",b)
-lbl.Size=UDim2.new(1,-56,1,0)
-lbl.Position=UDim2.new(0,48,0,0)
-lbl.BackgroundTransparency=1
-lbl.Text=texto
-lbl.TextColor3=CT
-lbl.Font=Enum.Font.GothamBold
-lbl.TextSize=12
-lbl.TextXAlignment=Enum.TextXAlignment.Left
-b._ativo=false
-b.MouseEnter:Connect(function()
-TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=CEH}):Play()
-end)
-b.MouseLeave:Connect(function()
-if not b._ativo then
-TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=CE}):Play()
-end
-end)
-b.MouseButton1Click:Connect(fn)
-return b,lbl
+local function criarAba(nome, icone, titulo)
+    local b = Instance.new("TextButton", sidebar)
+    b.Size = UDim2.new(1, 0, 0, 32)
+    b.BackgroundColor3 = C.element
+    b.Text = "  " .. icone .. "  " .. nome
+    b.TextColor3 = C.text
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 12
+    b.TextXAlignment = Enum.TextXAlignment.Left
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+    botoesAba[nome] = b
+
+    local p = Instance.new("Frame", content)
+    p.Size = UDim2.new(1, 0, 1, 0)
+    p.BackgroundTransparency = 1
+    p.Visible = false
+    paginas[nome] = p
+
+    local h = Instance.new("TextLabel", p)
+    h.Size = UDim2.new(1, 0, 0, 24)
+    h.BackgroundTransparency = 1
+    h.Text = titulo
+    h.TextColor3 = C.text
+    h.Font = Enum.Font.GothamBlack
+    h.TextSize = 15
+    h.TextXAlignment = Enum.TextXAlignment.Left
+
+    local line = Instance.new("Frame", p)
+    line.Size = UDim2.new(1, 0, 0, 1)
+    line.Position = UDim2.new(0, 0, 0, 26)
+    line.BackgroundColor3 = C.accent
+    line.BorderSizePixel = 0
+    line.BackgroundTransparency = 0.6
+
+    b.MouseButton1Click:Connect(function() mostrarAba(nome) end)
+    return p
 end
 
+local function criarBotao(parent, icone, texto, y, fn)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(1, -20, 0, 42)
+    b.Position = UDim2.new(0, 10, 0, y)
+    b.BackgroundColor3 = C.element
+    b.Text = ""
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
 
-local pgMain=criarAba("Main","H","Principal")
-local pgFarm=criarAba("Farm","F","Auto Farm Level")
-local pgSub=criarAba("Sub","S","Sub Farm")
-local pgRaid=criarAba("Raid","R","Auto Raid")
-local pgConfig=criarAba("Config","C","Configuracoes")
+    local str = Instance.new("UIStroke", b)
+    str.Color = C.accent
+    str.Thickness = 1
+    str.Transparency = 0.7
 
-local function criarStatusBox(parent,y,titulo,altura)
-local box=Instance.new("Frame",parent)
-box.Size=UDim2.new(1,-20,0,altura or 80)
-box.Position=UDim2.new(0,10,0,y)
-box.BackgroundColor3=CE
-box.BorderSizePixel=0
-Instance.new("UICorner",box).CornerRadius=UDim.new(0,10)
-local t=Instance.new("TextLabel",box)
-t.Size=UDim2.new(1,-24,0,16)
-t.Position=UDim2.new(0,12,0,8)
-t.BackgroundTransparency=1
-t.Text=titulo
-t.TextColor3=CA2
-t.TextFont=Enum.Font.GothamBlack
-t.TextSize=10
-t.TextXAlignment=Enum.TextXAlignment.Left
-local lbl=Instance.new("TextLabel",box)
-lbl.Size=UDim2.new(1,-24,0,(altura or 80)-30)
-lbl.Position=UDim2.new(0,12,0,26)
-lbl.BackgroundTransparency=1
-lbl.Text="Parado"
-lbl.TextColor3=CT
-lbl.Font=Enum.Font.Gotham
-lbl.TextSize=11
-lbl.TextXAlignment=Enum.TextXAlignment.Left
-lbl.TextYAlignment=Enum.TextYAlignment.Top
-lbl.TextWrapped=true
-return lbl
+    local ico = Instance.new("TextLabel", b)
+    ico.Size = UDim2.new(0, 40, 1, 0)
+    ico.Position = UDim2.new(0, 6, 0, 0)
+    ico.BackgroundTransparency = 1
+    ico.Text = icone
+    ico.TextColor3 = C.text
+    ico.Font = Enum.Font.GothamBold
+    ico.TextSize = 18
+    ico.TextXAlignment = Enum.TextXAlignment.Center
+
+    local lbl = Instance.new("TextLabel", b)
+    lbl.Size = UDim2.new(1, -56, 1, 0)
+    lbl.Position = UDim2.new(0, 48, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = texto
+    lbl.TextColor3 = C.text
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 12
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+    b._ativo = false
+    b.MouseEnter:Connect(function()
+        TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = C.hover}):Play()
+    end)
+    b.MouseLeave:Connect(function()
+        if not b._ativo then
+            TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = C.element}):Play()
+        end
+    end)
+    b.MouseButton1Click:Connect(fn)
+    return b, lbl
 end
 
-local bPular,bPularLbl=criarBotao(pgMain,"!","Pular Alto",40,function()
-local c=plr.Character
-if c and c:FindFirstChild("HumanoidRootPart")then c.HumanoidRootPart.Velocity=Vector3.new(0,100,0)end
-end)
+local function criarStatusBox(parent, y, titulo, altura)
+    local box = Instance.new("Frame", parent)
+    box.Size = UDim2.new(1, -20, 0, altura or 80)
+    box.Position = UDim2.new(0, 10, 0, y)
+    box.BackgroundColor3 = C.element
+    box.BorderSizePixel = 0
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
 
-local bVel,bVelLbl=criarBotao(pgMain,"V","Velocidade 50",90,function()
-local c=plr.Character
-if c and c:FindFirstChild("Humanoid")then c.Humanoid.WalkSpeed=50 end
-end)
+    local t = Instance.new("TextLabel", box)
+    t.Size = UDim2.new(1, -24, 0, 16)
+    t.Position = UDim2.new(0, 12, 0, 8)
+    t.BackgroundTransparency = 1
+    t.Text = titulo
+    t.TextColor3 = C.accent2
+    t.Font = Enum.Font.GothamBlack
+    t.TextSize = 10
+    t.TextXAlignment = Enum.TextXAlignment.Left
 
-local bInf,bInfLbl=criarBotao(pgMain,"+","Vida Infinita",140,function()
-local c=plr.Character
-if c and c:FindFirstChild("Humanoid")then
-c.Humanoid.MaxHealth=math.huge
-c.Humanoid.Health=math.huge
+    local lbl = Instance.new("TextLabel", box)
+    lbl.Size = UDim2.new(1, -24, 0, (altura or 80) - 30)
+    lbl.Position = UDim2.new(0, 12, 0, 26)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "Parado"
+    lbl.TextColor3 = C.text
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 11
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.TextYAlignment = Enum.TextYAlignment.Top
+    lbl.TextWrapped = true
+    return lbl
 end
-end)
 
+-- ========== CRIAÇÃO DAS ABAS ==========
+local pgMain = criarAba("Main", "🏠", "Principal")
+local pgFarm = criarAba("Farm", "⚔️", "Auto Farm Level")
+local pgBoss = criarAba("Boss", "👹", "Auto Farm Boss")
+local pgRaid = criarAba("Raid", "🐉", "Auto Raid")
+local pgFruit = criarAba("Fruit", "🍎", "Fruit Sniper")
+local pgWeapons = criarAba("Weapons", "🗡️", "CDK / TTK / Soul")
+local pgESP = criarAba("ESP", "👁️", "Visual")
+local pgConfig = criarAba("Config", "⚙️", "Configurações")
 
-local bFarm,bFarmLbl=criarBotao(pgFarm,"F","Auto Farm: OFF",40,function()
-_G.autoF=not _G.autoF
-if _G.autoF then
-bFarmLbl.Text="Auto Farm: ON"
-bFarm._ativo=true
-bFarm.BackgroundColor3=Color3.fromRGB(30,120,40)
-_G.kC=0
-_G.missao=nil
-task.spawn(loopFarm)
-else
-bFarmLbl.Text="Auto Farm: OFF"
-bFarm._ativo=false
-bFarm.BackgroundColor3=CE
-end
-end)
+print("[GravityHub] Parte 1 OK — Estrutura + 8 abas criadas")
 
-local stFarm=criarStatusBox(pgFarm,90,"STATUS FARM",80)
-
-local bAutoBoss,bAutoBossLbl=criarBotao(pgFarm,"B","Auto Boss: OFF",180,function()
-_G.autoBoss=not _G.autoBoss
-if _G.autoBoss then
-bAutoBossLbl.Text="Auto Boss: ON"
-bAutoBoss._ativo=true
-bAutoBoss.BackgroundColor3=Color3.fromRGB(30,120,40)
-task.spawn(loopAutoBoss)
-else
-bAutoBossLbl.Text="Auto Boss: OFF"
-bAutoBoss._ativo=false
-bAutoBoss.BackgroundColor3=CE
-end
-end)
-
-local bossBtn=Instance.new("TextButton",pgFarm)
-bossBtn.Size=UDim2.new(1,-20,0,32)
-bossBtn.Position=UDim2.new(0,10,0,230)
-bossBtn.BackgroundColor3=CEH
-bossBtn.Text="Selecionar Boss"
-bossBtn.TextColor3=CT
-bossBtn.Font=Enum.Font.GothamBold
-bossBtn.TextSize=11
-bossBtn.BorderSizePixel=0
-bossBtn.AutoButtonColor=false
-Instance.new("UICorner",bossBtn).CornerRadius=UDim.new(0,8)
-
-local bossStatus=Instance.new("TextLabel",pgFarm)
-bossStatus.Size=UDim2.new(1,-20,0,18)
-bossStatus.Position=UDim2.new(0,10,0,268)
-bossStatus.BackgroundTransparency=1
-bossStatus.Text="Nenhum boss selecionado"
-bossStatus.TextColor3=CTD
-bossStatus.Font=Enum.Font.Gotham
-bossStatus.TextSize=10
-bossStatus.TextXAlignment=Enum.TextXAlignment.Left
-
-local bossMenu=Instance.new("Frame",pgFarm)
-bossMenu.Size=UDim2.new(1,-20,0,90)
-bossMenu.Position=UDim2.new(0,10,0,290)
-bossMenu.BackgroundColor3=CB
-bossMenu.BorderSizePixel=0
-bossMenu.Visible=false
-Instance.new("UICorner",bossMenu).CornerRadius=UDim.new(0,10)
-
-local bossScroll=Instance.new("ScrollingFrame",bossMenu)
-bossScroll.Size=UDim2.new(1,-10,1,-10)
-bossScroll.Position=UDim2.new(0,5,0,5)
-bossScroll.BackgroundTransparency=1
-bossScroll.CanvasSize=UDim2.new(0,0,0,0)
-bossScroll.AutomaticCanvasSize=Enum.AutomaticSize.Y
-bossScroll.ScrollBarThickness=4
-
-local bossListLayout=Instance.new("UIListLayout",bossScroll)
-bossListLayout.Padding=UDim.new(0,4)
-
-
-local bRedeem,bRedeemLbl=criarBotao(pgSub,"$","Resgatar Todos os Codigos",40,function()
-local rem=RS:FindFirstChild("Remotes")
-if rem then rem=rem:FindFirstChild("Redeem")end
-if not rem then
-stSub.Text="Redeem remote nao encontrado"
-return
-end
-local codigos={
-"EASTEREXP","LIGHTNINGABUSE","1LOSTADMIN","ADMINFIGHT",
-"kittgaming","KITT_RESET","DRAGONABUSE","Sub2CaptainMaui",
-"CHANDLER","CODE_SERVICIO","DEVSCOOKING","Sub2Fer999",
-"Enyu_is_Pro","Magicbus","JCWK","Starcodeheo",
-"Bluxxy","fudd10_v2","SUB2GAMERROBOT_EXP1","THEGREATACE",
-"Axiore","TantaiGaming","Fudd10","STRAWHATMAINE",
-"BIGNEWS","SUB2UNCLEEKIZARU","SUB2NOOBMASTER123","Sub2Daigrock"
-}
-local sucessos=0
-for _,codigo in ipairs(codigos)do
-pcall(function()rem:InvokeServer(codigo)end)
-sucessos=sucessos+1
-stSub.Text="Resgatando: "..codigo.." ("..sucessos.."/"..#codigos..")"
-task.wait(0.4)
-end
-stSub.Text="Resgate finalizado! "..sucessos.."/"..#codigos
-end)
-
-local stSub=criarStatusBox(pgSub,90,"STATUS SUB FARM",60)
-
-local bSub,bSubLbl=criarBotao(pgSub,"S","Sub Farm: OFF",160,function()
-_G.subFarm=not _G.subFarm
-if _G.subFarm then
-bSubLbl.Text="Sub Farm: ON"
-bSub._ativo=true
-bSub.BackgroundColor3=Color3.fromRGB(30,120,40)
-else
-bSubLbl.Text="Sub Farm: OFF"
-bSub._ativo=false
-bSub.BackgroundColor3=CE
-end
-end)
-
-local bRaid,bRaidLbl=criarBotao(pgRaid,"R","Auto Raid: OFF",40,function()
-_G.raid=not _G.raid
-if _G.raid then
-bRaidLbl.Text="Auto Raid: ON"
-bRaid._ativo=true
-bRaid.BackgroundColor3=Color3.fromRGB(30,120,40)
-else
-bRaidLbl.Text="Auto Raid: OFF"
-bRaid._ativo=false
-bRaid.BackgroundColor3=CE
-end
-end)
-
-local stRaid=criarStatusBox(pgRaid,90,"STATUS RAID",60)
-
-local configInfo=Instance.new("Frame",pgConfig)
-configInfo.Size=UDim2.new(1,-20,0,60)
-configInfo.Position=UDim2.new(0,10,0,40)
-configInfo.BackgroundColor3=CE
-configInfo.BorderSizePixel=0
-Instance.new("UICorner",configInfo).CornerRadius=UDim.new(0,10)
-
-local cName=Instance.new("TextLabel",configInfo)
-cName.Size=UDim2.new(1,-20,0,22)
-cName.Position=UDim2.new(0,14,0,10)
-cName.BackgroundTransparency=1
-cName.Text="Gravity Hub"
-cName.TextColor3=CT
-cName.Font=Enum.Font.GothamBlack
-cName.TextSize=15
-cName.TextXAlignment=Enum.TextXAlignment.Left
-
-local cVer=Instance.new("TextLabel",configInfo)
-cVer.Size=UDim2.new(1,-20,0,18)
-cVer.Position=UDim2.new(0,14,0,32)
-cVer.BackgroundTransparency=1
-cVer.Text="Versao 2.0 - GrandGroup"
-cVer.TextColor3=CTD
-cVer.Font=Enum.Font.Gotham
-cVer.TextSize=11
-cVer.TextXAlignment=Enum.TextXAlignment.Left
-
-local configCredits=Instance.new("Frame",pgConfig)
-configCredits.Size=UDim2.new(1,-20,0,90)
-configCredits.Position=UDim2.new(0,10,0,110)
-configCredits.BackgroundColor3=CE
-configCredits.BorderSizePixel=0
-Instance.new("UICorner",configCredits).CornerRadius=UDim.new(0,10)
-local credStroke=Instance.new("UIStroke",configCredits)
-credStroke.Color=CA
-credStroke.Thickness=1
-credStroke.Transparency=0.5
-
-local credTitle=Instance.new("TextLabel",configCredits)
-credTitle.Size=UDim2.new(1,-20,0,18)
-credTitle.Position=UDim2.new(0,10,0,8)
-credTitle.BackgroundTransparency=1
-credTitle.Text="CREDITOS"
-credTitle.TextColor3=CA2
-credTitle.Font=Enum.Font.GothamBlack
-credTitle.TextSize=10
-credTitle.TextXAlignment=Enum.TextXAlignment.Left
-
-local credMain=Instance.new("TextLabel",configCredits)
-credMain.Size=UDim2.new(1,-20,0,26)
-credMain.Position=UDim2.new(0,10,0,30)
-credMain.BackgroundTransparency=1
-credMain.Text="GrandGroup"
-credMain.TextColor3=CA2
-credMain.Font=Enum.Font.GothamBlack
-credMain.TextSize=18
-credMain.TextXAlignment=Enum.TextXAlignment.Center
-
-local credSub=Instance.new("TextLabel",configCredits)
-credSub.Size=UDim2.new(1,-20,0,20)
-credSub.Position=UDim2.new(0,10,0,60)
-credSub.BackgroundTransparency=1
-credSub.Text="Todos os direitos reservados 2025"
-credSub.TextColor3=CTD
-credSub.Font=Enum.Font.Gotham
-credSub.TextSize=10
-credSub.TextXAlignment=Enum.TextXAlignment.Center
-
-
-hideBtn.MouseEnter:Connect(function()
-TweenService:Create(hideBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(100,80,140)}):Play()
-end)
-hideBtn.MouseLeave:Connect(function()
-TweenService:Create(hideBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(70,60,100)}):Play()
-end)
-hideBtn.MouseButton1Click:Connect(function()
-win.Visible=not win.Visible
-end)
-
-minBtn.MouseEnter:Connect(function()
-TweenService:Create(minBtn,TweenInfo.new(0.15),{BackgroundColor3=CA}):Play()
-end)
-minBtn.MouseLeave:Connect(function()
-TweenService:Create(minBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(45,45,65)}):Play()
-end)
-cb.MouseEnter:Connect(function()
-TweenService:Create(cb,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(255,110,130)}):Play()
-end)
-cb.MouseLeave:Connect(function()
-TweenService:Create(cb,TweenInfo.new(0.15),{BackgroundColor3=CR}):Play()
-end)
-
-minBtn.MouseButton1Click:Connect(function()
-minimizado=not minimizado
-if minimizado then
-TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,540,0,48)}):Play()
-sidebar.Visible=false
-content.Visible=false
-creditos.Visible=false
-minBtn.Text="+"
-else
-TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,540,0,400)}):Play()
-sidebar.Visible=true
-content.Visible=true
-creditos.Visible=true
-minBtn.Text="-"
-end
-end)
-
-cb.MouseButton1Click:Connect(function() sg:Destroy() end)
-
-local arr=false
-local im,ip
-ttl.InputBegan:Connect(function(input)
-if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-arr=true im=input.Position ip=win.Position
-input.Changed:Connect(function()
-if input.UserInputState==Enum.UserInputState.End then arr=false end
-end)
-end
-end)
-UIS.InputChanged:Connect(function(input)
-if arr and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch)then
-local d=input.Position-im
-win.Position=UDim2.new(ip.X.Scale,ip.X.Offset+d.X,ip.Y.Scale,ip.Y.Offset+d.Y)
-end
-end)
-
+-- ========== TABELAS ==========
 local NPCs={
-BanditQuest1=Vector3.new(1060,16,1547),
-JungleQuest=Vector3.new(-1601,36,153),
-BuggyQuest1=Vector3.new(-1141,4,3831),
-DesertQuest=Vector3.new(894,5,4392),
-SnowQuest=Vector3.new(1387,86,-1295),
-MarineQuest2=Vector3.new(-5039,27,4324),
-SkyQuest=Vector3.new(-4839,716,-2619),
-PrisonerQuest=Vector3.new(5310,0,474),
-ColosseumQuest=Vector3.new(-1580,6,-2986),
-MagmaQuest=Vector3.new(-5313,10,8515),
-FishmanQuest=Vector3.new(61121,17,1564),
-SkyExp1Quest=Vector3.new(-4721,843,-1949),
-SkyExp2Quest=Vector3.new(-7904,5634,-1409),
-FountainQuest=Vector3.new(5259,37,4050),
-Area1Quest=Vector3.new(531,10,726),
-Area2Quest=Vector3.new(627,10,801),
-MarineQuest3=Vector3.new(-2400,10,-282),
-ZombieQuest=Vector3.new(-5686,10,-2237),
-SnowQuest3=Vector3.new(60,980,-1370),
-LabQuest=Vector3.new(373,20,-1960),
-MagmaQuest2=Vector3.new(57,76,-1699),
-ShipQuest1=Vector3.new(-3425,25,-241),
-ShipQuest2=Vector3.new(-3424,25,-287),
-FrostQuest=Vector3.new(571,629,-1283),
-ForgottenQuest=Vector3.new(-3050,240,8015),
-PiratePortQuest=Vector3.new(-275,10,4175),
-DragonCrewQuest=Vector3.new(2965,10,-6847),
-HydraQuest=Vector3.new(5755,610,-267),
-GreatTreeQuest=Vector3.new(1154,10,5632),
-TurtleQuest=Vector3.new(-16130,10,398),
-DeepForestQuest=Vector3.new(-12424,332,-7643),
-DeepForestQuest2=Vector3.new(-12424,332,-7643),
-HauntedQuest1=Vector3.new(-9524,142,-5892),
-HauntedQuest2=Vector3.new(-9524,142,-5892),
-PeanutQuest=Vector3.new(-1250,142,-10650),
-IceCreamQuest=Vector3.new(-1897,142,-11322),
-CakeQuest1=Vector3.new(-1353,142,-11465),
-CakeQuest2=Vector3.new(-1673,142,-11280),
-ChocolateQuest1=Vector3.new(-13093,142,-9999),
-ChocolateQuest2=Vector3.new(-13100,142,-10250),
-CandyCaneQuest=Vector3.new(-13572,142,-11338),
-TikiQuest1=Vector3.new(-16340,205,-11100),
-TikiQuest2=Vector3.new(-16540,205,-11380),
-TikiQuest3=Vector3.new(-16585,205,-11530),
-SubmergedQuest1=Vector3.new(-39231,110,-2305),
-SubmergedQuest2=Vector3.new(-39733,110,-2113),
+BanditQuest1=Vector3.new(1060,16,1547),JungleQuest=Vector3.new(-1601,36,153),
+BuggyQuest1=Vector3.new(-1141,4,3831),DesertQuest=Vector3.new(894,5,4392),
+SnowQuest=Vector3.new(1387,86,-1295),MarineQuest2=Vector3.new(-5039,27,4324),
+SkyQuest=Vector3.new(-4839,716,-2619),PrisonerQuest=Vector3.new(5310,0,474),
+ColosseumQuest=Vector3.new(-1580,6,-2986),MagmaQuest=Vector3.new(-5313,10,8515),
+FishmanQuest=Vector3.new(61121,17,1564),SkyExp1Quest=Vector3.new(-4721,843,-1949),
+SkyExp2Quest=Vector3.new(-7904,5634,-1409),FountainQuest=Vector3.new(5259,37,4050),
+Area1Quest=Vector3.new(531,10,726),Area2Quest=Vector3.new(627,10,801),
+MarineQuest3=Vector3.new(-2400,10,-282),ZombieQuest=Vector3.new(-5686,10,-2237),
+SnowQuest3=Vector3.new(60,980,-1370),LabQuest=Vector3.new(373,20,-1960),
+MagmaQuest2=Vector3.new(57,76,-1699),ShipQuest1=Vector3.new(-3425,25,-241),
+ShipQuest2=Vector3.new(-3424,25,-287),FrostQuest=Vector3.new(571,629,-1283),
+ForgottenQuest=Vector3.new(-3050,240,8015),PiratePortQuest=Vector3.new(-275,10,4175),
+DragonCrewQuest=Vector3.new(2965,10,-6847),HydraQuest=Vector3.new(5755,610,-267),
+GreatTreeQuest=Vector3.new(1154,10,5632),TurtleQuest=Vector3.new(-16130,10,398),
+DeepForestQuest=Vector3.new(-12424,332,-7643),DeepForestQuest2=Vector3.new(-12424,332,-7643),
+HauntedQuest1=Vector3.new(-9524,142,-5892),HauntedQuest2=Vector3.new(-9524,142,-5892),
+PeanutQuest=Vector3.new(-1250,142,-10650),IceCreamQuest=Vector3.new(-1897,142,-11322),
+CakeQuest1=Vector3.new(-1353,142,-11465),CakeQuest2=Vector3.new(-1673,142,-11280),
+ChocolateQuest1=Vector3.new(-13093,142,-9999),ChocolateQuest2=Vector3.new(-13100,142,-10250),
+CandyCaneQuest=Vector3.new(-13572,142,-11338),TikiQuest1=Vector3.new(-16340,205,-11100),
+TikiQuest2=Vector3.new(-16540,205,-11380),TikiQuest3=Vector3.new(-16585,205,-11530),
+SubmergedQuest1=Vector3.new(-39231,110,-2305),SubmergedQuest2=Vector3.new(-39733,110,-2113),
 SubmergedQuest3=Vector3.new(-40295,110,-1987)}
 
 local quests={
-{L=1,M="Bandit",QN="BanditQuest1",QL=1,KL=5},
-{L=10,M="Monkey",QN="JungleQuest",QL=1,KL=6},
-{L=15,M="Gorilla",QN="JungleQuest",QL=2,KL=8},
-{L=30,M="Pirate",QN="BuggyQuest1",QL=1,KL=8},
-{L=40,M="Brute",QN="BuggyQuest1",QL=2,KL=8},
-{L=60,M="Desert Bandit",QN="DesertQuest",QL=1,KL=8},
-{L=75,M="Desert Officer",QN="DesertQuest",QL=2,KL=6},
-{L=90,M="Snow Bandit",QN="SnowQuest",QL=1,KL=7},
-{L=100,M="Snowman",QN="SnowQuest",QL=2,KL=8},
-{L=120,M="Chief Petty Officer",QN="MarineQuest2",QL=1,KL=8},
-{L=150,M="Sky Bandit",QN="SkyQuest",QL=1,KL=7},
-{L=175,M="Dark Master",QN="SkyQuest",QL=2,KL=8},
-{L=190,M="Prisoner",QN="PrisonerQuest",QL=1,KL=8},
-{L=210,M="Dangerous Prisoner",QN="PrisonerQuest",QL=2,KL=8},
-{L=250,M="Toga Warrior",QN="ColosseumQuest",QL=1,KL=7},
-{L=275,M="Gladiator",QN="ColosseumQuest",QL=2,KL=8},
-{L=300,M="Military Soldier",QN="MagmaQuest",QL=1,KL=7},
-{L=325,M="Military Spy",QN="MagmaQuest",QL=2,KL=8},
-{L=375,M="Fishman Warrior",QN="FishmanQuest",QL=1,KL=8},
-{L=400,M="Fishman Commando",QN="FishmanQuest",QL=2,KL=7},
-{L=450,M="God's Guard",QN="SkyExp1Quest",QL=1,KL=7},
-{L=475,M="Shanda",QN="SkyExp1Quest",QL=2,KL=9},
-{L=525,M="Royal Squad",QN="SkyExp2Quest",QL=1,KL=8},
-{L=550,M="Royal Soldier",QN="SkyExp2Quest",QL=2,KL=8},
-{L=625,M="Galley Pirate",QN="FountainQuest",QL=1,KL=8},
-{L=650,M="Galley Captain",QN="FountainQuest",QL=2,KL=9},
-{L=700,M="Raider",QN="Area1Quest",QL=1,KL=5},
-{L=725,M="Mercenary",QN="Area1Quest",QL=2,KL=5},
-{L=775,M="Swan Pirate",QN="Area2Quest",QL=1,KL=5},
-{L=800,M="Factory Staff",QN="Area2Quest",QL=2,KL=5},
-{L=875,M="Marine Lieutenant",QN="MarineQuest3",QL=1,KL=5},
-{L=900,M="Marine Captain",QN="MarineQuest3",QL=2,KL=5},
-{L=950,M="Zombie",QN="ZombieQuest",QL=1,KL=5},
-{L=975,M="Vampire",QN="ZombieQuest",QL=2,KL=5},
-{L=1000,M="Snow Trooper",QN="SnowQuest3",QL=1,KL=5},
-{L=1050,M="Winter Warrior",QN="SnowQuest3",QL=2,KL=5},
-{L=1100,M="Lab Subordinate",QN="LabQuest",QL=1,KL=5},
-{L=1125,M="Horned Warrior",QN="LabQuest",QL=2,KL=5},
-{L=1175,M="Magma Ninja",QN="MagmaQuest2",QL=1,KL=5},
-{L=1200,M="Lava Pirate",QN="MagmaQuest2",QL=2,KL=5},
-{L=1250,M="Ship Deckhand",QN="ShipQuest1",QL=1,KL=5},
-{L=1275,M="Ship Engineer",QN="ShipQuest1",QL=2,KL=5},
-{L=1300,M="Ship Steward",QN="ShipQuest2",QL=1,KL=5},
-{L=1325,M="Ship Officer",QN="ShipQuest2",QL=2,KL=5},
-{L=1350,M="Arctic Warrior",QN="FrostQuest",QL=1,KL=5},
-{L=1375,M="Snow Lurker",QN="FrostQuest",QL=2,KL=5},
-{L=1425,M="Sea Soldier",QN="ForgottenQuest",QL=1,KL=5},
-{L=1450,M="Water Fighter",QN="ForgottenQuest",QL=2,KL=5},
-{L=1500,M="Pirate Millionaire",QN="PiratePortQuest",QL=1,KL=5},
-{L=1525,M="Pistol Billionaire",QN="PiratePortQuest",QL=2,KL=5},
-{L=1575,M="Dragon Crew Warrior",QN="DragonCrewQuest",QL=1,KL=5},
-{L=1600,M="Dragon Crew Archer",QN="DragonCrewQuest",QL=2,KL=5},
-{L=1625,M="Hydra Enforcer",QN="HydraQuest",QL=1,KL=5},
-{L=1650,M="Venomous Assailant",QN="HydraQuest",QL=2,KL=5},
-{L=1700,M="Marine Commodore",QN="GreatTreeQuest",QL=1,KL=5},
-{L=1725,M="Marine Rear Admiral",QN="GreatTreeQuest",QL=2,KL=5},
-{L=1775,M="Fishman Raider",QN="TurtleQuest",QL=1,KL=5},
-{L=1800,M="Fishman Captain",QN="TurtleQuest",QL=2,KL=5},
-{L=1825,M="Forest Pirate",QN="DeepForestQuest",QL=1,KL=5},
-{L=1850,M="Mythological Pirate",QN="DeepForestQuest",QL=2,KL=5},
-{L=1900,M="Jungle Pirate",QN="DeepForestQuest2",QL=1,KL=5},
-{L=1925,M="Musketeer Pirate",QN="DeepForestQuest2",QL=2,KL=5},
-{L=1975,M="Reborn Skeleton",QN="HauntedQuest1",QL=1,KL=5},
-{L=2000,M="Living Zombie",QN="HauntedQuest1",QL=2,KL=5},
-{L=2025,M="Demonic Soul",QN="HauntedQuest2",QL=1,KL=5},
-{L=2050,M="Possessed Mummy",QN="HauntedQuest2",QL=2,KL=5},
-{L=2075,M="Peanut Scout",QN="PeanutQuest",QL=1,KL=5},
-{L=2100,M="Peanut President",QN="PeanutQuest",QL=2,KL=5},
-{L=2125,M="Ice Cream Chef",QN="IceCreamQuest",QL=1,KL=5},
-{L=2150,M="Ice Cream Commander",QN="IceCreamQuest",QL=2,KL=5},
-{L=2200,M="Cookie Crafter",QN="CakeQuest1",QL=1,KL=5},
-{L=2225,M="Cake Guard",QN="CakeQuest1",QL=2,KL=5},
-{L=2250,M="Baking Staff",QN="CakeQuest2",QL=1,KL=5},
-{L=2275,M="Head Baker",QN="CakeQuest2",QL=2,KL=5},
-{L=2300,M="Cocoa Warrior",QN="ChocolateQuest1",QL=1,KL=5},
-{L=2325,M="Chocolate Bar Battler",QN="ChocolateQuest1",QL=2,KL=5},
-{L=2350,M="Sweet Thief",QN="ChocolateQuest2",QL=1,KL=5},
-{L=2375,M="Candy Rebel",QN="ChocolateQuest2",QL=2,KL=5},
-{L=2400,M="Candy Pirate",QN="CandyCaneQuest",QL=1,KL=5},
-{L=2425,M="Snow Demon",QN="CandyCaneQuest",QL=2,KL=5},
-{L=2450,M="Isle Outlaw",QN="TikiQuest1",QL=1,KL=5},
-{L=2475,M="Island Boy",QN="TikiQuest1",QL=2,KL=5},
-{L=2500,M="Sun-kissed Warrior",QN="TikiQuest2",QL=1,KL=5},
-{L=2525,M="Isle Champion",QN="TikiQuest2",QL=2,KL=5},
-{L=2550,M="Serpent Hunter",QN="TikiQuest3",QL=1,KL=5},
-{L=2575,M="Skull Slayer",QN="TikiQuest3",QL=2,KL=5},
-{L=2600,M="Reef Bandit",QN="SubmergedQuest1",QL=1,KL=5},
-{L=2625,M="Coral Pirate",QN="SubmergedQuest1",QL=2,KL=5},
-{L=2650,M="Sea Chanter",QN="SubmergedQuest2",QL=1,KL=5},
-{L=2675,M="Ocean Prophet",QN="SubmergedQuest2",QL=2,KL=5},
-{L=2700,M="High Disciple",QN="SubmergedQuest3",QL=1,KL=5},
-{L=2725,M="Grand Devotee",QN="SubmergedQuest3",QL=2,KL=5}}
+{L=1,M="Bandit",QN="BanditQuest1",QL=1,KL=5},{L=10,M="Monkey",QN="JungleQuest",QL=1,KL=6},
+{L=15,M="Gorilla",QN="JungleQuest",QL=2,KL=8},{L=30,M="Pirate",QN="BuggyQuest1",QL=1,KL=8},
+{L=40,M="Brute",QN="BuggyQuest1",QL=2,KL=8},{L=60,M="Desert Bandit",QN="DesertQuest",QL=1,KL=8},
+{L=75,M="Desert Officer",QN="DesertQuest",QL=2,KL=6},{L=90,M="Snow Bandit",QN="SnowQuest",QL=1,KL=7},
+{L=100,M="Snowman",QN="SnowQuest",QL=2,KL=8},{L=120,M="Chief Petty Officer",QN="MarineQuest2",QL=1,KL=8},
+{L=150,M="Sky Bandit",QN="SkyQuest",QL=1,KL=7},{L=175,M="Dark Master",QN="SkyQuest",QL=2,KL=8},
+{L=190,M="Prisoner",QN="PrisonerQuest",QL=1,KL=8},{L=210,M="Dangerous Prisoner",QN="PrisonerQuest",QL=2,KL=8},
+{L=250,M="Toga Warrior",QN="ColosseumQuest",QL=1,KL=7},{L=275,M="Gladiator",QN="ColosseumQuest",QL=2,KL=8},
+{L=300,M="Military Soldier",QN="MagmaQuest",QL=1,KL=7},{L=325,M="Military Spy",QN="MagmaQuest",QL=2,KL=8},
+{L=375,M="Fishman Warrior",QN="FishmanQuest",QL=1,KL=8},{L=400,M="Fishman Commando",QN="FishmanQuest",QL=2,KL=7},
+{L=450,M="God's Guard",QN="SkyExp1Quest",QL=1,KL=7},{L=475,M="Shanda",QN="SkyExp1Quest",QL=2,KL=9},
+{L=525,M="Royal Squad",QN="SkyExp2Quest",QL=1,KL=8},{L=550,M="Royal Soldier",QN="SkyExp2Quest",QL=2,KL=8},
+{L=625,M="Galley Pirate",QN="FountainQuest",QL=1,KL=8},{L=650,M="Galley Captain",QN="FountainQuest",QL=2,KL=9},
+{L=700,M="Raider",QN="Area1Quest",QL=1,KL=5},{L=725,M="Mercenary",QN="Area1Quest",QL=2,KL=5},
+{L=775,M="Swan Pirate",QN="Area2Quest",QL=1,KL=5},{L=800,M="Factory Staff",QN="Area2Quest",QL=2,KL=5},
+{L=875,M="Marine Lieutenant",QN="MarineQuest3",QL=1,KL=5},{L=900,M="Marine Captain",QN="MarineQuest3",QL=2,KL=5},
+{L=950,M="Zombie",QN="ZombieQuest",QL=1,KL=5},{L=975,M="Vampire",QN="ZombieQuest",QL=2,KL=5},
+{L=1000,M="Snow Trooper",QN="SnowQuest3",QL=1,KL=5},{L=1050,M="Winter Warrior",QN="SnowQuest3",QL=2,KL=5},
+{L=1100,M="Lab Subordinate",QN="LabQuest",QL=1,KL=5},{L=1125,M="Horned Warrior",QN="LabQuest",QL=2,KL=5},
+{L=1175,M="Magma Ninja",QN="MagmaQuest2",QL=1,KL=5},{L=1200,M="Lava Pirate",QN="MagmaQuest2",QL=2,KL=5},
+{L=1250,M="Ship Deckhand",QN="ShipQuest1",QL=1,KL=5},{L=1275,M="Ship Engineer",QN="ShipQuest1",QL=2,KL=5},
+{L=1300,M="Ship Steward",QN="ShipQuest2",QL=1,KL=5},{L=1325,M="Ship Officer",QN="ShipQuest2",QL=2,KL=5},
+{L=1350,M="Arctic Warrior",QN="FrostQuest",QL=1,KL=5},{L=1375,M="Snow Lurker",QN="FrostQuest",QL=2,KL=5},
+{L=1425,M="Sea Soldier",QN="ForgottenQuest",QL=1,KL=5},{L=1450,M="Water Fighter",QN="ForgottenQuest",QL=2,KL=5},
+{L=1500,M="Pirate Millionaire",QN="PiratePortQuest",QL=1,KL=5},{L=1525,M="Pistol Billionaire",QN="PiratePortQuest",QL=2,KL=5},
+{L=1575,M="Dragon Crew Warrior",QN="DragonCrewQuest",QL=1,KL=5},{L=1600,M="Dragon Crew Archer",QN="DragonCrewQuest",QL=2,KL=5},
+{L=1625,M="Hydra Enforcer",QN="HydraQuest",QL=1,KL=5},{L=1650,M="Venomous Assailant",QN="HydraQuest",QL=2,KL=5},
+{L=1700,M="Marine Commodore",QN="GreatTreeQuest",QL=1,KL=5},{L=1725,M="Marine Rear Admiral",QN="GreatTreeQuest",QL=2,KL=5},
+{L=1775,M="Fishman Raider",QN="TurtleQuest",QL=1,KL=5},{L=1800,M="Fishman Captain",QN="TurtleQuest",QL=2,KL=5},
+{L=1825,M="Forest Pirate",QN="DeepForestQuest",QL=1,KL=5},{L=1850,M="Mythological Pirate",QN="DeepForestQuest",QL=2,KL=5},
+{L=1900,M="Jungle Pirate",QN="DeepForestQuest2",QL=1,KL=5},{L=1925,M="Musketeer Pirate",QN="DeepForestQuest2",QL=2,KL=5},
+{L=1975,M="Reborn Skeleton",QN="HauntedQuest1",QL=1,KL=5},{L=2000,M="Living Zombie",QN="HauntedQuest1",QL=2,KL=5},
+{L=2025,M="Demonic Soul",QN="HauntedQuest2",QL=1,KL=5},{L=2050,M="Possessed Mummy",QN="HauntedQuest2",QL=2,KL=5},
+{L=2075,M="Peanut Scout",QN="PeanutQuest",QL=1,KL=5},{L=2100,M="Peanut President",QN="PeanutQuest",QL=2,KL=5},
+{L=2125,M="Ice Cream Chef",QN="IceCreamQuest",QL=1,KL=5},{L=2150,M="Ice Cream Commander",QN="IceCreamQuest",QL=2,KL=5},
+{L=2200,M="Cookie Crafter",QN="CakeQuest1",QL=1,KL=5},{L=2225,M="Cake Guard",QN="CakeQuest1",QL=2,KL=5},
+{L=2250,M="Baking Staff",QN="CakeQuest2",QL=1,KL=5},{L=2275,M="Head Baker",QN="CakeQuest2",QL=2,KL=5},
+{L=2300,M="Cocoa Warrior",QN="ChocolateQuest1",QL=1,KL=5},{L=2325,M="Chocolate Bar Battler",QN="ChocolateQuest1",QL=2,KL=5},
+{L=2350,M="Sweet Thief",QN="ChocolateQuest2",QL=1,KL=5},{L=2375,M="Candy Rebel",QN="ChocolateQuest2",QL=2,KL=5},
+{L=2400,M="Candy Pirate",QN="CandyCaneQuest",QL=1,KL=5},{L=2425,M="Snow Demon",QN="CandyCaneQuest",QL=2,KL=5},
+{L=2450,M="Isle Outlaw",QN="TikiQuest1",QL=1,KL=5},{L=2475,M="Island Boy",QN="TikiQuest1",QL=2,KL=5},
+{L=2500,M="Sun-kissed Warrior",QN="TikiQuest2",QL=1,KL=5},{L=2525,M="Isle Champion",QN="TikiQuest2",QL=2,KL=5},
+{L=2550,M="Serpent Hunter",QN="TikiQuest3",QL=1,KL=5},{L=2575,M="Skull Slayer",QN="TikiQuest3",QL=2,KL=5},
+{L=2600,M="Reef Bandit",QN="SubmergedQuest1",QL=1,KL=5},{L=2625,M="Coral Pirate",QN="SubmergedQuest1",QL=2,KL=5},
+{L=2650,M="Sea Chanter",QN="SubmergedQuest2",QL=1,KL=5},{L=2675,M="Ocean Prophet",QN="SubmergedQuest2",QL=2,KL=5},
+{L=2700,M="High Disciple",QN="SubmergedQuest3",QL=1,KL=5},{L=2725,M="Grand Devotee",QN="SubmergedQuest3",QL=2,KL=5}}
 
 local ES={"Combat","Black Leg","Electro","Fishman Karate","Superhuman","Death Step","Sharkman Karate","Electric Claw","Dragon Talon","Godhuman","Sanguine Art","Dragon Breath"}
 
-local function gLvl()
-local d=plr:FindFirstChild("Data")
-if d and d:FindFirstChild("Level")then return d.Level.Value end
-return 1 end
+-- ========== FUNÇÕES ==========
+function getLevel()
+    local d=plr:FindFirstChild("Data")
+    if d and d:FindFirstChild("Level")then return d.Level.Value end
+    return 1
+end
 
-local function gQ(lv)
-local q=quests[1]
-for _,v in ipairs(quests)do if v.L<=lv then q=v else break end end
-return q end
+function getQuestByLevel(lv)
+    local q=quests[1]
+    for _,v in ipairs(quests)do
+        if v.L<=lv then q=v else break end
+    end
+    return q
+end
 
-local function lerProgressoQuest()
-local d=plr:FindFirstChild("Data")
-if not d then return 0,0 end
-local q=d:FindFirstChild("Quest")
-if not q then return 0,0 end
-local k=q:FindFirstChild("Kills")
-local r=q:FindFirstChild("Requirement")
-if k and r then return k.Value,r.Value end
-return 0,0 end
+function getQuestProgress()
+    local d=plr:FindFirstChild("Data")
+    if not d then return 0,0 end
+    local q=d:FindFirstChild("Quest")
+    if not q then return 0,0 end
+    local k=q:FindFirstChild("Kills")
+    local r=q:FindFirstChild("Requirement")
+    if k and r then return k.Value,r.Value end
+    return 0,0
+end
 
-local function voarPara(destino,vel,alturaVoo)
-vel=vel or 275
-alturaVoo=alturaVoo or 70
-local c=plr.Character
-if not c then return false end
-local hrp=c:FindFirstChild("HumanoidRootPart")
-if not hrp then return false end
-local posInicial=hrp.Position
-local alturaAlvo=posInicial.Y+alturaVoo
-if math.abs(posInicial.Y-alturaAlvo)>2 then
-local bp1=Instance.new("BodyPosition")
-bp1.MaxForce=Vector3.new(0,1e5,0)
-bp1.P=15000
-bp1.D=500
-bp1.Position=Vector3.new(posInicial.X,alturaAlvo,posInicial.Z)
-bp1.Parent=hrp
-local t0=tick()
-while _G.autoF and (tick()-t0)<4 do
-local y=hrp.Position.Y
-if math.abs(y-alturaAlvo)<3 then break end
-bp1.Position=Vector3.new(hrp.Position.X,alturaAlvo,hrp.Position.Z)
-task.wait(0.01)
+function findEnemy(name)
+    local c=plr.Character
+    if not c or not c:FindFirstChild("HumanoidRootPart")then return nil end
+    local pos=c.HumanoidRootPart.Position
+    local best,bd=nil,math.huge
+    local folder=workspace:FindFirstChild("Enemies")
+    if folder then
+        for _,o in ipairs(folder:GetChildren())do
+            if o:IsA("Model")and o.Name:lower():find(name:lower(),1,true)then
+                local h=o:FindFirstChild("HumanoidRootPart")
+                local u=o:FindFirstChildOfClass("Humanoid")
+                if h and u and u.Health>0 then
+                    local d=(h.Position-pos).Magnitude
+                    if d<bd then bd=d best=o end
+                end
+            end
+        end
+    end
+    if best then return best end
+    for _,o in ipairs(workspace:GetDescendants())do
+        if o:IsA("Model")and o.Name:lower():find(name:lower(),1,true)then
+            local h=o:FindFirstChild("HumanoidRootPart")
+            local u=o:FindFirstChildOfClass("Humanoid")
+            if h and u and u.Health>0 then
+                local d=(h.Position-pos).Magnitude
+                if d<bd then bd=d best=o end
+            end
+        end
+    end
+    return best
 end
-if bp1.Parent then bp1:Destroy() end
+
+function findStyle()
+    local bp=plr:FindFirstChild("Backpack")
+    if not bp then return nil end
+    for _,it in ipairs(bp:GetChildren())do
+        if it:IsA("Tool")then
+            for _,n in ipairs(ES)do
+                if it.Name:lower():find(n:lower(),1,true)then return it end
+            end
+        end
+    end
+    return nil
 end
-local bp=Instance.new("BodyPosition")
-bp.MaxForce=Vector3.new(0,1e5,0)
-bp.P=15000
-bp.D=500
-bp.Position=Vector3.new(hrp.Position.X,hrp.Position.Y,hrp.Position.Z)
-bp.Parent=hrp
-local bv=Instance.new("BodyVelocity")
-bv.MaxForce=Vector3.new(1e5,0,1e5)
-bv.P=5000
-bv.Parent=hrp
-local bg=Instance.new("BodyGyro")
-bg.MaxTorque=Vector3.new(1e5,1e5,1e5)
-bg.P=8000
-bg.CFrame=CFrame.new(hrp.Position,destino)
-bg.Parent=hrp
-local conn
-local finalizado=false
-local t0=tick()
-local alturaAtual=hrp.Position.Y
-conn=RunService.Heartbeat:Connect(function(dt)
-if not _G.autoF or not hrp.Parent or(tick()-t0)>30 then
-finalizado=true
-return
+
+function equipStyle()
+    local c=plr.Character
+    if not c then return nil end
+    local u=c:FindFirstChildOfClass("Humanoid")
+    if not u then return nil end
+    local e=c:FindFirstChildOfClass("Tool")
+    if e then
+        for _,n in ipairs(ES)do
+            if e.Name:lower():find(n:lower(),1,true)then return e.Name end
+        end
+    end
+    local f=findStyle()
+    if not f then return nil end
+    for _=1,3 do
+        pcall(function() u:EquipTool(f) end)
+        task.wait(0.1)
+        local chk=c:FindFirstChild(f.Name)
+        if chk and chk:IsA("Tool")then return f.Name end
+    end
+    return f.Name
 end
-local pos=hrp.Position
-local diff=destino-pos
-local dXZ=Vector3.new(diff.X,0,diff.Z).Magnitude
-if dXZ<5 then
-finalizado=true
-return
+
+function ensureStyle()
+    local c=plr.Character
+    if not c then return end
+    local e=c:FindFirstChildOfClass("Tool")
+    if e then
+        for _,n in ipairs(ES)do
+            if e.Name:lower():find(n:lower(),1,true)then return end
+        end
+    end
+    equipStyle()
 end
-local fator=1
-if dXZ<40 then fator=math.max(dXZ/40,0.25) end
-local dirXZ=Vector3.new(diff.X,0,diff.Z).Unit
-bv.Velocity=dirXZ*vel*fator
-bp.Position=Vector3.new(pos.X,alturaAtual,pos.Z)
-bg.CFrame=CFrame.new(pos,destino)
+
+function attack(target)
+    local c=plr.Character
+    if not c then return end
+    local u=target:FindFirstChildOfClass("Humanoid")
+    local h=target:FindFirstChild("HumanoidRootPart")
+    if not u or not h then return end
+    local t=c:FindFirstChildOfClass("Tool")
+    if t then pcall(function() t:Activate() end) end
+    pcall(function() RS.Remotes.CommF_:InvokeServer("Attack",true) end)
+    pcall(function() VIM:ClickButton1(Vector2.new(0,0)) end)
+    pcall(function()
+        VIM:SendMouseButtonEvent(0,0,0,true,game,1)
+        VIM:SendMouseButtonEvent(0,0,0,false,game,1)
+    end)
+    if u.Health>=u.MaxHealth then
+        pcall(function() u:TakeDamage(5) end)
+    end
+end
+
+function flyTo(dest,vel,altura)
+    vel=vel or _G.farmSpeed
+    altura=altura or 70
+    local c=plr.Character
+    if not c then return false end
+    local hrp=c:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+    local pI=hrp.Position
+    local altAlvo=pI.Y+altura
+    if math.abs(pI.Y-altAlvo)>2 then
+        local bp1=Instance.new("BodyPosition")
+        bp1.MaxForce=Vector3.new(0,1e5,0)
+        bp1.P=15000
+        bp1.D=500
+        bp1.Position=Vector3.new(pI.X,altAlvo,pI.Z)
+        bp1.Parent=hrp
+        local t0=tick()
+        while (tick()-t0)<4 do
+            if math.abs(hrp.Position.Y-altAlvo)<3 then break end
+            bp1.Position=Vector3.new(hrp.Position.X,altAlvo,hrp.Position.Z)
+            task.wait(0.01)
+        end
+        if bp1.Parent then bp1:Destroy() end
+    end
+    local bp=Instance.new("BodyPosition")
+    bp.MaxForce=Vector3.new(0,1e5,0)
+    bp.P=15000
+    bp.D=500
+    bp.Position=hrp.Position
+    bp.Parent=hrp
+    local bv=Instance.new("BodyVelocity")
+    bv.MaxForce=Vector3.new(1e5,0,1e5)
+    bv.P=5000
+    bv.Parent=hrp
+    local bg=Instance.new("BodyGyro")
+    bg.MaxTorque=Vector3.new(1e5,1e5,1e5)
+    bg.P=8000
+    bg.CFrame=CFrame.new(hrp.Position,dest)
+    bg.Parent=hrp
+    local conn
+    local done=false
+    local t0=tick()
+    local altAtual=hrp.Position.Y
+    conn=RunService.Heartbeat:Connect(function()
+        if not hrp.Parent or (tick()-t0)>30 then done=true return end
+        local pos=hrp.Position
+        local diff=dest-pos
+        local dXZ=Vector3.new(diff.X,0,diff.Z).Magnitude
+        if dXZ<5 then done=true return end
+        local fator=1
+        if dXZ<40 then fator=math.max(dXZ/40,0.25) end
+        bv.Velocity=Vector3.new(diff.X,0,diff.Z).Unit*vel*fator
+        bp.Position=Vector3.new(pos.X,altAtual,pos.Z)
+        bg.CFrame=CFrame.new(pos,dest)
+    end)
+    while not done do task.wait(0.01) end
+    if conn then conn:Disconnect() end
+    if bv.Parent then bv:Destroy() end
+    if bg.Parent then bg:Destroy() end
+    if hrp.Parent then
+        local tDesc=tick()
+        while (tick()-tDesc)<4 do
+            local pos=hrp.Position
+            local diff=dest-pos
+            if diff.Magnitude<4 then break end
+            local nY=pos.Y+diff.Unit.Y*math.min(50,math.abs(diff.Y)+5)
+            if math.abs(diff.Y)<3 then nY=dest.Y end
+            bp.Position=Vector3.new(dest.X,nY,dest.Z)
+            task.wait(0.01)
+        end
+    end
+    if bp.Parent then bp:Destroy() end
+    return true
+end
+
+print("[GravityHub] Parte 2 OK — Combate + Tabelas")
+
+local bPular,bPularLbl=criarBotao(pgMain,"⚡","Pular Alto",40,function()
+    local c=plr.Character
+    if c and c:FindFirstChild("HumanoidRootPart")then c.HumanoidRootPart.Velocity=Vector3.new(0,100,0)end
 end)
-while not finalizado and _G.autoF do
-task.wait(0.01)
-end
-if conn then conn:Disconnect() end
-if bv.Parent then bv:Destroy() end
-if bg.Parent then bg:Destroy() end
-if _G.autoF and hrp.Parent then
-local tDescida=tick()
-while _G.autoF and (tick()-tDescida)<4 do
-local pos=hrp.Position
-local diff=destino-pos
-local dist3D=diff.Magnitude
-if dist3D<4 then break end
-local novoY=pos.Y+diff.Unit.Y*math.min(50,math.abs(diff.Y)+5)
-if math.abs(diff.Y)<3 then novoY=destino.Y end
-bp.Position=Vector3.new(destino.X,novoY,destino.Z)
-task.wait(0.01)
-end
-end
-if bp.Parent then bp:Destroy() end
-return true end
 
-local function encontrarAlvo(nome)
-local c=plr.Character
-if not c or not c:FindFirstChild("HumanoidRootPart")then return nil end
-local pos=c.HumanoidRootPart.Position
-local best,bd=nil,math.huge
-local pasta=workspace:FindFirstChild("Enemies")
-if pasta then
-for _,o in ipairs(pasta:GetChildren())do
-if o:IsA("Model")and o.Name:lower():find(nome:lower(),1,true)then
-local h=o:FindFirstChild("HumanoidRootPart")
-local u=o:FindFirstChildOfClass("Humanoid")
-if h and u and u.Health>0 then
-local d=(h.Position-pos).Magnitude
-if d<bd then bd=d best=o end
-end end end end
-if best then return best end
-for _,o in ipairs(workspace:GetDescendants())do
-if o:IsA("Model")and o.Name:lower():find(nome:lower(),1,true)then
-local h=o:FindFirstChild("HumanoidRootPart")
-local u=o:FindFirstChildOfClass("Humanoid")
-if h and u and u.Health>0 then
-local d=(h.Position-pos).Magnitude
-if d<bd then bd=d best=o end
-end end end
-return best end
-
-local function encontrarEstilo()
-local bp=plr:FindFirstChild("Backpack")
-if not bp then return nil end
-for _,it in ipairs(bp:GetChildren())do
-if it:IsA("Tool")then
-for _,n in ipairs(ES)do
-if it.Name:lower():find(n:lower(),1,true)then return it end
-end
-end
-end
-return nil end
-
-local function equipar()
-local c=plr.Character
-if not c then return nil end
-local u=c:FindFirstChildOfClass("Humanoid")
-if not u then return nil end
-local e=c:FindFirstChildOfClass("Tool")
-if e then
-for _,n in ipairs(ES)do
-if e.Name:lower():find(n:lower(),1,true)then return e.Name end
-end
-end
-local f=encontrarEstilo()
-if not f then return nil end
-for _=1,3 do
-pcall(function() u:EquipTool(f) end)
-task.wait(0.15)
-local chk=c:FindFirstChild(f.Name)
-if chk and chk:IsA("Tool")then return f.Name end
-end
-return f.Name end
-
-local function atacarComDano(alvo)
-local c=plr.Character
-if not c then return end
-local u=alvo:FindFirstChildOfClass("Humanoid")
-local h=alvo:FindFirstChild("HumanoidRootPart")
-if not u or not h then return end
-local t=c:FindFirstChildOfClass("Tool")
-if t then pcall(function() t:Activate() end) end
-pcall(function() RS.Remotes.CommF_:InvokeServer("Attack",true) end)
-pcall(function() VIM:ClickButton1(Vector2.new(0,0)) end)
-pcall(function()
-VIM:SendMouseButtonEvent(0,0,0,true,game,1)
-task.wait(0.01)
-VIM:SendMouseButtonEvent(0,0,0,false,game,1)
+local bVel,bVelLbl=criarBotao(pgMain,"🏃","Velocidade 50",90,function()
+    local c=plr.Character
+    if c and c:FindFirstChild("Humanoid")then c.Humanoid.WalkSpeed=50 end
 end)
-if u.Health>=u.MaxHealth then
-pcall(function() u:TakeDamage(5) end)
-end
+
+local bInf,bInfLbl=criarBotao(pgMain,"❤️","Vida Infinita",140,function()
+    local c=plr.Character
+    if c and c:FindFirstChild("Humanoid")then
+        c.Humanoid.MaxHealth=math.huge
+        c.Humanoid.Health=math.huge
+    end
+end)
+
+local bSpeed200,bSpeed200Lbl=criarBotao(pgMain,"💨","Velocidade 200",190,function()
+    local c=plr.Character
+    if c and c:FindFirstChild("Humanoid")then c.Humanoid.WalkSpeed=200 end
+end)
+
+-- Config: slider de velocidade de voo
+local speedBox=Instance.new("Frame",pgConfig)
+speedBox.Size=UDim2.new(1,-20,0,70)
+speedBox.Position=UDim2.new(0,10,0,40)
+speedBox.BackgroundColor3=C.element
+speedBox.BorderSizePixel=0
+Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,10)
+
+local speedTitle=Instance.new("TextLabel",speedBox)
+speedTitle.Size=UDim2.new(1,-24,0,20)
+speedTitle.Position=UDim2.new(0,12,0,8)
+speedTitle.BackgroundTransparency=1
+speedTitle.Text="VELOCIDADE DE VOO: 275"
+speedTitle.TextColor3=C.accent2
+speedTitle.Font=Enum.Font.GothamBlack
+speedTitle.TextSize=11
+speedTitle.TextXAlignment=Enum.TextXAlignment.Left
+
+local speedBar=Instance.new("Frame",speedBox)
+speedBar.Size=UDim2.new(1,-24,0,8)
+speedBar.Position=UDim2.new(0,12,0,36)
+speedBar.BackgroundColor3=Color3.fromRGB(40,40,55)
+speedBar.BorderSizePixel=0
+Instance.new("UICorner",speedBar).CornerRadius=UDim.new(1,0)
+
+local speedFill=Instance.new("Frame",speedBar)
+speedFill.Size=UDim2.new(0.5,0,1,0)
+speedFill.BackgroundColor3=C.accent
+speedFill.BorderSizePixel=0
+Instance.new("UICorner",speedFill).CornerRadius=UDim.new(1,0)
+
+local speedBtn=Instance.new("TextButton",speedBox)
+speedBtn.Size=UDim2.new(1,-24,0,20)
+speedBtn.Position=UDim2.new(0,12,0,48)
+speedBtn.BackgroundTransparency=1
+speedBtn.Text="Clique para alternar: 275 / 350 / 200 / 500"
+speedBtn.TextColor3=C.textDim
+speedBtn.Font=Enum.Font.Gotham
+speedBtn.TextSize=10
+speedBtn.TextXAlignment=Enum.TextXAlignment.Left
+
+local speeds={275,350,200,500}
+local speedIdx=1
+speedBtn.MouseButton1Click:Connect(function()
+    speedIdx=speedIdx%#speeds+1
+    _G.farmSpeed=speeds[speedIdx]
+    speedTitle.Text="VELOCIDADE DE VOO: ".._G.farmSpeed
+    speedFill.Size=UDim2.new(speedIdx/#speeds,0,1,0)
+end)
+
+local infoBox=Instance.new("Frame",pgConfig)
+infoBox.Size=UDim2.new(1,-20,0,80)
+infoBox.Position=UDim2.new(0,10,0,120)
+infoBox.BackgroundColor3=C.element
+infoBox.BorderSizePixel=0
+Instance.new("UICorner",infoBox).CornerRadius=UDim.new(0,10)
+
+local infoTitle=Instance.new("TextLabel",infoBox)
+infoTitle.Size=UDim2.new(1,-24,0,16)
+infoTitle.Position=UDim2.new(0,12,0,8)
+infoTitle.BackgroundTransparency=1
+infoTitle.Text="INFORMAÇÕES"
+infoTitle.TextColor3=C.accent2
+infoTitle.Font=Enum.Font.GothamBlack
+infoTitle.TextSize=10
+infoTitle.TextXAlignment=Enum.TextXAlignment.Left
+
+local infoTxt=Instance.new("TextLabel",infoBox)
+infoTxt.Size=UDim2.new(1,-24,0,50)
+infoTxt.Position=UDim2.new(0,12,0,28)
+infoTxt.BackgroundTransparency=1
+infoTxt.Text="Gravity Hub v3.0\nDesenvolvido por GrandGroup\nNão me responsabilizo por bans"
+infoTxt.TextColor3=C.text
+infoTxt.Font=Enum.Font.Gotham
+infoTxt.TextSize=11
+infoTxt.TextXAlignment=Enum.TextXAlignment.Left
+infoTxt.TextYAlignment=Enum.TextYAlignment.Top
+
+print("[GravityHub] Parte 3 OK — Main + Config")
+
+local bFarm,bFarmLbl=criarBotao(pgFarm,"⚔️","Auto Farm Level: OFF",40,function()
+    _G.autoFarm=not _G.autoFarm
+    if _G.autoFarm then
+        bFarmLbl.Text="Auto Farm Level: ON"
+        bFarm._ativo=true
+        bFarm.BackgroundColor3=Color3.fromRGB(30,120,40)
+        _G.killCount=0
+        _G.currentQuest=nil
+        task.spawn(loopFarm)
+    else
+        bFarmLbl.Text="Auto Farm Level: OFF"
+        bFarm._ativo=false
+        bFarm.BackgroundColor3=C.element
+    end
+end)
+
+local stFarm=criarStatusBox(pgFarm,90,"STATUS FARM",90)
+
+function loopFarm()
+    while _G.autoFarm do
+        local c=plr.Character
+        if c and c:FindFirstChild("HumanoidRootPart")and c:FindFirstChildOfClass("Humanoid")then
+            local lv=getLevel()
+            local q=getQuestByLevel(lv)
+            if not _G.currentQuest or _G.currentQuest.L~=q.L then
+                _G.currentQuest=q
+                _G.killCount=0
+                local npcPos=NPCs[q.QN]
+                if npcPos then
+                    stFarm.Text="Nv "..lv.." | Voando ate "..q.QN
+                    flyTo(Vector3.new(npcPos.X,npcPos.Y+10,npcPos.Z),275,70)
+                    stFarm.Text="Nv "..lv.." | Aceitando missao..."
+                    task.wait(1.5)
+                end
+                pcall(function() RS.Remotes.CommF_:InvokeServer("StartQuest",q.QN,q.QL) end)
+                _G.lastQuestAttempt=tick()
+                task.wait(1)
+            end
+
+            local kAtual,kNec=getQuestProgress()
+            if kAtual==0 then kAtual=_G.killCount end
+            if kNec==0 then kNec=q.KL or 5 end
+
+            if kAtual>=kNec and kNec>0 then
+                stFarm.Text="Missao completa! ("..kAtual.."/"..kNec..")"
+                _G.currentQuest=nil
+                _G.killCount=0
+                task.wait(2)
+            else
+                local target=findEnemy(q.M)
+                if target and target:FindFirstChild("HumanoidRootPart")then
+                    local h=target.HumanoidRootPart
+                    local u=target:FindFirstChildOfClass("Humanoid")
+                    local c2=plr.Character
+                    local hum=c2 and c2:FindFirstChildOfClass("Humanoid")
+                    local hrp=c2 and c2:FindFirstChild("HumanoidRootPart")
+                    if u and u.Health>0 and hum and hrp then
+                        stFarm.Text="Nv "..lv.." | Voando ate "..q.M
+                        flyTo(h.Position+Vector3.new(0,10,0),275,30)
+                        local bp=Instance.new("BodyPosition")
+                        bp.MaxForce=Vector3.new(1e5,1e5,1e5)
+                        bp.P=30000
+                        bp.D=1500
+                        bp.Position=h.Position+Vector3.new(0,10,0)
+                        bp.Parent=hrp
+                        local bg=Instance.new("BodyGyro")
+                        bg.MaxTorque=Vector3.new(1e5,1e5,1e5)
+                        bg.P=15000
+                        bg.CFrame=CFrame.new(hrp.Position,h.Position)
+                        bg.Parent=hrp
+                        hum.PlatformStand=true
+                        task.wait(0.1)
+                        equipStyle()
+                        task.wait(0.3)
+                        local cPos
+                        cPos=RunService.Heartbeat:Connect(function()
+                            if not _G.autoFarm or not h.Parent or not hrp.Parent then return end
+                            bp.Position=h.Position+Vector3.new(0,10,0)
+                            bg.CFrame=CFrame.new(hrp.Position,h.Position)
+                            hrp.Velocity=Vector3.new(0,0,0)
+                            if hum.Parent then hum.PlatformStand=true end
+                            ensureStyle()
+                        end)
+                        local cAtk
+                        cAtk=RunService.Heartbeat:Connect(function()
+                            if not _G.autoFarm or not u.Parent or u.Health<=0 then return end
+                            attack(target)
+                        end)
+                        local t0=tick()
+                        while _G.autoFarm and u.Parent and u.Health>0 and (tick()-t0)<30 do
+                            local kA,kN=getQuestProgress()
+                            if kA==0 then kA=_G.killCount end
+                            if kN==0 then kN=q.KL or 5 end
+                            stFarm.Text="Nv "..lv.." | "..q.M.." | HP "..math.floor(u.Health).." | Kills "..kA.."/"..kN
+                            task.wait(0.1)
+                        end
+                        if cAtk then cAtk:Disconnect() end
+                        if cPos then cPos:Disconnect() end
+                        if bp.Parent then bp:Destroy() end
+                        if bg.Parent then bg:Destroy() end
+                        if hum.Parent then
+                            hum.PlatformStand=false
+                            hum.WalkSpeed=16
+                        end
+                        if u.Parent and u.Health<=0 then
+                            _G.killCount=_G.killCount+1
+                            task.wait(0.5)
+                        end
+                    end
+                else
+                    stFarm.Text="Nv "..lv.." | Procurando "..q.M
+                end
+            end
+        else
+            stFarm.Text="Sem personagem"
+        end
+        task.wait(0.1)
+    end
+    stFarm.Text="Parado"
 end
 
-local function garantirEstilo()
-local c=plr.Character
-if not c then return end
-local e=c:FindFirstChildOfClass("Tool")
-if e then
-for _,n in ipairs(ES)do
-if e.Name:lower():find(n:lower(),1,true)then return end
-end
-end
-equipar()
-end
+print("[GravityHub] Parte 4 OK — Farm Level")
+
 
 local bossList={
 {Name="Gorilla King",Level=25,Island="Jungle",Model="Gorilla King"},
@@ -959,7 +878,6 @@ local bossList={
 {Name="Awakened Ice Admiral",Level=1400,Island="Ice Castle",Model="Awakened Ice Admiral"},
 {Name="Tide Keeper",Level=1475,Island="Forgotten Island",Model="Tide Keeper"},
 {Name="Stone",Level=1550,Island="Port Town",Model="Stone"},
-{Name="Hydra Enforcer",Level=1575,Island="Hydra Island",Model="Hydra Enforcer"},
 {Name="Island Empress",Level=1650,Island="Hydra Island",Model="Island Empress"},
 {Name="Kilo Admiral",Level=1750,Island="Great Tree",Model="Kilo Admiral"},
 {Name="Captain Elephant",Level=1825,Island="Floating Turtle",Model="Captain Elephant"},
@@ -970,199 +888,532 @@ local bossList={
 {Name="Dough King",Level=2300,Island="Dough Kingdom",Model="Dough King"},
 {Name="Rip_Indra",Level=5000,Island="Castle on the Sea",Model="Rip_Indra"}}
 
-local function bossVivo(nomeModel)
-for _,obj in ipairs(workspace:GetDescendants())do
-if obj:IsA("Model")and obj.Name:lower():find(nomeModel:lower(),1,true)then
-local hum=obj:FindFirstChildOfClass("Humanoid")
-if hum and hum.Health>0 then return obj end
+function findBossAlive(nome)
+    for _,obj in ipairs(workspace:GetDescendants())do
+        if obj:IsA("Model")and obj.Name:lower():find(nome:lower(),1,true)then
+            local hum=obj:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health>0 then return obj end
+        end
+    end
+    return nil
 end
-end
-return nil end
 
-local function atualizarListaBoss()
-for _,b in ipairs(bossScroll:GetChildren())do
-if b:IsA("TextButton")then b:Destroy()end
-end
-local encontrados=0
-for _,boss in ipairs(bossList)do
-local obj=bossVivo(boss.Model)
-if obj then
-encontrados=encontrados+1
-local btn=Instance.new("TextButton",bossScroll)
-btn.Size=UDim2.new(1,-8,0,26)
-btn.BackgroundColor3=CE
-btn.Text="  "..boss.Name.." - Nv "..boss.Level.." ("..boss.Island..")"
-btn.TextColor3=CT
-btn.Font=Enum.Font.Gotham
-btn.TextSize=10
-btn.TextXAlignment=Enum.TextXAlignment.Left
-btn.BorderSizePixel=0
-Instance.new("UICorner",btn).CornerRadius=UDim.new(0,6)
-btn.MouseButton1Click:Connect(function()
-_G.bossSelecionado=boss
-bossStatus.Text="Selecionado: "..boss.Name
+local bossBtn=Instance.new("TextButton",pgBoss)
+bossBtn.Size=UDim2.new(1,-20,0,42)
+bossBtn.Position=UDim2.new(0,10,0,40)
+bossBtn.BackgroundColor3=C.element
+bossBtn.Text="🔍  Selecionar Boss"
+bossBtn.TextColor3=C.text
+bossBtn.Font=Enum.Font.GothamBold
+bossBtn.TextSize=12
+bossBtn.BorderSizePixel=0
+bossBtn.AutoButtonColor=false
+Instance.new("UICorner",bossBtn).CornerRadius=UDim.new(0,10)
+
+local bossStatus=Instance.new("TextLabel",pgBoss)
+bossStatus.Size=UDim2.new(1,-20,0,18)
+bossStatus.Position=UDim2.new(0,10,0,88)
+bossStatus.BackgroundTransparency=1
+bossStatus.Text="Nenhum boss selecionado"
+bossStatus.TextColor3=C.textDim
+bossStatus.Font=Enum.Font.Gotham
+bossStatus.TextSize=10
+bossStatus.TextXAlignment=Enum.TextXAlignment.Left
+
+local bossMenu=Instance.new("Frame",pgBoss)
+bossMenu.Size=UDim2.new(1,-20,0,100)
+bossMenu.Position=UDim2.new(0,10,0,110)
+bossMenu.BackgroundColor3=C.panel
+bossMenu.BorderSizePixel=0
 bossMenu.Visible=false
-end)
-end
-end
-if encontrados==0 then
-local lbl=Instance.new("TextLabel",bossScroll)
-lbl.Size=UDim2.new(1,-8,0,40)
-lbl.BackgroundTransparency=1
-lbl.Text="Nenhum boss spawnado. Server hop!"
-lbl.TextColor3=CTD
-lbl.Font=Enum.Font.Gotham
-lbl.TextSize=10
-lbl.TextWrapped=true
-end
+Instance.new("UICorner",bossMenu).CornerRadius=UDim.new(0,10)
+
+local bossScroll=Instance.new("ScrollingFrame",bossMenu)
+bossScroll.Size=UDim2.new(1,-10,1,-10)
+bossScroll.Position=UDim2.new(0,5,0,5)
+bossScroll.BackgroundTransparency=1
+bossScroll.CanvasSize=UDim2.new(0,0,0,0)
+bossScroll.AutomaticCanvasSize=Enum.AutomaticSize.Y
+bossScroll.ScrollBarThickness=4
+
+local bossLayout=Instance.new("UIListLayout",bossScroll)
+bossLayout.Padding=UDim.new(0,4)
+
+function atualizarListaBoss()
+    for _,b in ipairs(bossScroll:GetChildren())do
+        if b:IsA("TextButton")or b:IsA("TextLabel")then b:Destroy() end
+    end
+    local enc=0
+    for _,boss in ipairs(bossList)do
+        if findBossAlive(boss.Model)then
+            enc=enc+1
+            local btn=Instance.new("TextButton",bossScroll)
+            btn.Size=UDim2.new(1,-8,0,24)
+            btn.BackgroundColor3=C.element
+            btn.Text="  "..boss.Name.." - Nv "..boss.Level.." ("..boss.Island..")"
+            btn.TextColor3=C.text
+            btn.Font=Enum.Font.Gotham
+            btn.TextSize=10
+            btn.TextXAlignment=Enum.TextXAlignment.Left
+            btn.BorderSizePixel=0
+            Instance.new("UICorner",btn).CornerRadius=UDim.new(0,6)
+            btn.MouseButton1Click:Connect(function()
+                _G.selectedBoss=boss
+                bossStatus.Text="Selecionado: "..boss.Name
+                bossMenu.Visible=false
+            end)
+        end
+    end
+    if enc==0 then
+        local lbl=Instance.new("TextLabel",bossScroll)
+        lbl.Size=UDim2.new(1,-8,0,40)
+        lbl.BackgroundTransparency=1
+        lbl.Text="Nenhum boss spawnado. Server hop!"
+        lbl.TextColor3=C.textDim
+        lbl.Font=Enum.Font.Gotham
+        lbl.TextSize=10
+        lbl.TextWrapped=true
+    end
 end
 
 bossBtn.MouseButton1Click:Connect(function()
-atualizarListaBoss()
-bossMenu.Visible=not bossMenu.Visible
+    atualizarListaBoss()
+    bossMenu.Visible=not bossMenu.Visible
 end)
 
-local function loopAutoBoss()
-while _G.autoBoss do
-if _G.bossSelecionado then
-local obj=bossVivo(_G.bossSelecionado.Model)
-if obj then
-local h=obj:FindFirstChild("HumanoidRootPart")
-local u=obj:FindFirstChildOfClass("Humanoid")
-if h and u and u.Health>0 then
-local c=plr.Character
-if c and c:FindFirstChild("HumanoidRootPart")then
-voarPara(h.Position+Vector3.new(0,10,0),275,30)
-local hum=c:FindFirstChildOfClass("Humanoid")
-if hum then hum.PlatformStand=true end
-equipar()
-for _=1,5 do
-atacarComDano(obj)
-task.wait(0.05)
-end
-stFarm.Text="Boss: ".._G.bossSelecionado.Name.." | HP "..math.floor(u.Health)
-end
-end
-else
-stFarm.Text="Procurando boss ".._G.bossSelecionado.Name
-end
-end
-task.wait(0.5)
-end
+local bAutoBoss,bAutoBossLbl=criarBotao(pgBoss,"👹","Auto Boss: OFF",220,function()
+    _G.autoBoss=not _G.autoBoss
+    if _G.autoBoss then
+        bAutoBossLbl.Text="Auto Boss: ON"
+        bAutoBoss._ativo=true
+        bAutoBoss.BackgroundColor3=Color3.fromRGB(30,120,40)
+        task.spawn(loopAutoBoss)
+    else
+        bAutoBossLbl.Text="Auto Boss: OFF"
+        bAutoBoss._ativo=false
+        bAutoBoss.BackgroundColor3=C.element
+    end
+end)
+
+function loopAutoBoss()
+    while _G.autoBoss do
+        if _G.selectedBoss then
+            local obj=findBossAlive(_G.selectedBoss.Model)
+            if obj then
+                local h=obj:FindFirstChild("HumanoidRootPart")
+                local u=obj:FindFirstChildOfClass("Humanoid")
+                if h and u and u.Health>0 then
+                    local c=plr.Character
+                    if c and c:FindFirstChild("HumanoidRootPart")then
+                        flyTo(h.Position+Vector3.new(0,10,0),275,30)
+                        local hum=c:FindFirstChildOfClass("Humanoid")
+                        if hum then hum.PlatformStand=true end
+                        equipStyle()
+                        for _=1,5 do
+                            attack(obj)
+                            task.wait(0.05)
+                        end
+                        bossStatus.Text="Boss: ".._G.selectedBoss.Name.." | HP "..math.floor(u.Health)
+                    end
+                end
+            else
+                bossStatus.Text="Procurando ".._G.selectedBoss.Name
+            end
+        end
+        task.wait(0.5)
+    end
 end
 
-function loopFarm()
-while _G.autoF do
-local c=plr.Character
-if c and c:FindFirstChild("HumanoidRootPart")and c:FindFirstChildOfClass("Humanoid")then
-local lv=gLvl()
-local q=gQ(lv)
-if not _G.missao or _G.missao.L~=q.L then
-_G.missao=q
-_G.kC=0
-local npcPos=NPCs[q.QN]
-if npcPos then
-stFarm.Text="Nv "..lv.." | Voando ate NPC "..q.QN
-voarPara(Vector3.new(npcPos.X,npcPos.Y+10,npcPos.Z),275,70)
-stFarm.Text="Nv "..lv.." | Aceitando missao..."
-task.wait(1.5)
-end
-pcall(function() RS.Remotes.CommF_:InvokeServer("StartQuest",q.QN,q.QL) end)
-_G.uT=tick()
-task.wait(1)
-end
-local kAtual,kNec=lerProgressoQuest()
-if kAtual==0 then kAtual=_G.kC end
-if kNec==0 then kNec=q.KL or 5 end
-if kAtual>=kNec and kNec>0 then
-stFarm.Text="Missao completa! ("..kAtual.."/"..kNec..")"
-_G.missao=nil
-_G.kC=0
-task.wait(2)
-else
-local alvo=encontrarAlvo(q.M)
-if alvo and alvo:FindFirstChild("HumanoidRootPart")then
-local h=alvo.HumanoidRootPart
-local u=alvo:FindFirstChildOfClass("Humanoid")
-local c2=plr.Character
-local hum=c2 and c2:FindFirstChildOfClass("Humanoid")
-local hrp=c2 and c2:FindFirstChild("HumanoidRootPart")
-if u and u.Health>0 and hum and hrp then
-stFarm.Text="Nv "..lv.." | Voando ate "..q.M
-voarPara(h.Position+Vector3.new(0,10,0),275,30)
-local bp=Instance.new("BodyPosition")
-bp.MaxForce=Vector3.new(1e5,1e5,1e5)
-bp.P=30000
-bp.D=1500
-bp.Position=h.Position+Vector3.new(0,10,0)
-bp.Parent=hrp
-local bg=Instance.new("BodyGyro")
-bg.MaxTorque=Vector3.new(1e5,1e5,1e5)
-bg.P=15000
-bg.CFrame=CFrame.new(hrp.Position,h.Position)
-bg.Parent=hrp
-hum.PlatformStand=true
-task.wait(0.1)
-local nomeEq=equipar()
-stFarm.Text="Nv "..lv.." | Estilo: "..tostring(nomeEq)
-task.wait(0.3)
-local connPos
-connPos=RunService.Heartbeat:Connect(function()
-if not _G.autoF or not h.Parent or not hrp.Parent then return end
-bp.Position=h.Position+Vector3.new(0,10,0)
-bg.CFrame=CFrame.new(hrp.Position,h.Position)
-hrp.Velocity=Vector3.new(0,0,0)
-if hum.Parent then
-hum.PlatformStand=true
-end
-garantirEstilo()
+print("[GravityHub] Parte 5 OK — Boss")
+
+
+local bRaid,bRaidLbl=criarBotao(pgRaid,"🐉","Auto Raid: OFF",40,function()
+    _G.autoRaid=not _G.autoRaid
+    if _G.autoRaid then
+        bRaidLbl.Text="Auto Raid: ON"
+        bRaid._ativo=true
+        bRaid.BackgroundColor3=Color3.fromRGB(30,120,40)
+        task.spawn(loopRaid)
+    else
+        bRaidLbl.Text="Auto Raid: OFF"
+        bRaid._ativo=false
+        bRaid.BackgroundColor3=C.element
+    end
 end)
-local connAtk
-connAtk=RunService.Heartbeat:Connect(function()
-if not _G.autoF or not u.Parent or u.Health<=0 then return end
-atacarComDano(alvo)
+
+local bChip=Instance.new("TextButton",pgRaid)
+bChip.Size=UDim2.new(1,-20,0,42)
+bChip.Position=UDim2.new(0,10,0,90)
+bChip.BackgroundColor3=C.element
+bChip.Text="🎫  Comprar Chip (1M Beli)"
+bChip.TextColor3=C.text
+bChip.Font=Enum.Font.GothamBold
+bChip.TextSize=12
+bChip.BorderSizePixel=0
+bChip.AutoButtonColor=false
+Instance.new("UICorner",bChip).CornerRadius=UDim.new(0,10)
+bChip.MouseButton1Click:Connect(function()
+    pcall(function()
+        RS.Remotes.CommF_:InvokeServer("RaidsNpc","Select","Normal")
+        RS.Remotes.CommF_:InvokeServer("RaidsNpc","Select","Normal")
+    end)
+    stRaid.Text="Chip comprado (se tiver Beli)"
 end)
-local t0=tick()
-while _G.autoF and u.Parent and u.Health>0 and (tick()-t0)<30 do
-local kA,kN=lerProgressoQuest()
-if kA==0 then kA=_G.kC end
-if kN==0 then kN=q.KL or 5 end
-stFarm.Text="Nv "..lv.." | "..q.M.." | HP "..math.floor(u.Health).." | Kills "..kA.."/"..kN
-task.wait(0.05)
-end
-if connAtk then connAtk:Disconnect() end
-if connPos then connPos:Disconnect() end
-if bp.Parent then bp:Destroy() end
-if bg.Parent then bg:Destroy() end
-if hum.Parent then
-hum.PlatformStand=false
-hum.WalkSpeed=16
-end
-if u.Parent and u.Health<=0 then _G.kC=_G.kC+1 task.wait(0.5) end
-end
-else
-local kA,kN=lerProgressoQuest()
-if kA==0 then kA=_G.kC end
-if kN==0 then kN=q.KL or 5 end
-stFarm.Text="Nv "..lv.." | Procurando "..q.M.." | Kills: "..kA.."/"..kN
-end
-end
-else
-stFarm.Text="Sem personagem"
-end
-task.wait(0.1)
-end
-stFarm.Text="Parado"
+
+local stRaid=criarStatusBox(pgRaid,140,"STATUS RAID",70)
+
+function loopRaid()
+    while _G.autoRaid do
+        stRaid.Text="Auto Raid | Procurando chip..."
+        pcall(function()
+            RS.Remotes.CommF_:InvokeServer("RaidsNpc","Select","Normal")
+        end)
+        task.wait(3)
+        stRaid.Text="Auto Raid | Entrando..."
+        pcall(function()
+            RS.Remotes.CommF_:InvokeServer("RaidsNpc","Next")
+        end)
+        task.wait(3)
+    end
+    stRaid.Text="Raid parado"
 end
 
-task.spawn(function()
-while sg.Parent do
-if bossMenu.Visible then atualizarListaBoss()end
-task.wait(10)
+print("[GravityHub] Parte 6 OK — Raid")
+
+
+local fruitList={"Rocket","Spin","Chop","Spring","Bomb","Smoke","Spike","Flame","Falcon","Ice","Sand","Dark","Diamond","Light","Rubber","Barrier","Magma","Door","Quake","Human: Buddha","Love","Spider","Sound","Phoenix","Portal","Rumble","Pain","Blizzard","Gravity","Mammoth","T-Rex","Dough","Shadow","Venom","Control","Spirit","Dragon","Leopard","Kitsune","Yeti","Gas"}
+
+local bFruit,bFruitLbl=criarBotao(pgFruit,"🍎","Fruit Sniper: OFF",40,function()
+    _G.autoFruit=not _G.autoFruit
+    if _G.autoFruit then
+        bFruitLbl.Text="Fruit Sniper: ON"
+        bFruit._ativo=true
+        bFruit.BackgroundColor3=Color3.fromRGB(30,120,40)
+        task.spawn(loopFruit)
+    else
+        bFruitLbl.Text="Fruit Sniper: OFF"
+        bFruit._ativo=false
+        bFruit.BackgroundColor3=C.element
+    end
+end)
+
+local stFruit=criarStatusBox(pgFruit,90,"STATUS FRUIT",70)
+
+function findFruit()
+    local c=plr.Character
+    if not c or not c:FindFirstChild("HumanoidRootPart")then return nil end
+    local best,bd=nil,math.huge
+    for _,o in ipairs(workspace:GetDescendants())do
+        if o:IsA("Model")and o:FindFirstChild("Handle")then
+            local hn=o.Name:lower()
+            for _,f in ipairs(fruitList)do
+                if hn:find(f:lower(),1,true)then
+                    local hrp=o:FindFirstChild("Handle")or o:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        local d=(hrp.Position-c.HumanoidRootPart.Position).Magnitude
+                        if d<bd then bd=d best=o end
+                    end
+                    break
+                end
+            end
+        end
+    end
+    return best
 end
+
+function loopFruit()
+    while _G.autoFruit do
+        local c=plr.Character
+        if c and c:FindFirstChild("HumanoidRootPart")then
+            local f=findFruit()
+            if f then
+                stFruit.Text="Fruta: "..f.Name
+                local h=f:FindFirstChild("Handle")or f:FindFirstChild("HumanoidRootPart")
+                if h then
+                    flyTo(h.Position,275,0)
+                    task.wait(0.5)
+                    pcall(function()
+                        RS.Remotes.CommF_:InvokeServer("StoreFruit",f.Name)
+                    end)
+                    stFruit.Text="Armazenada: "..f.Name
+                end
+            else
+                stFruit.Text="Procurando frutas..."
+            end
+        end
+        task.wait(0.5)
+    end
+    stFruit.Text="Fruit parado"
+end
+
+-- ESP de Frutas
+local espPasta=Instance.new("Folder",sg)
+espPasta.Name="FruitESP"
+
+local bESP,bESPLbl=criarBotao(pgESP,"👁️","ESP Frutas: OFF",40,function()
+    _G.espFruits=not _G.espFruits
+    if _G.espFruits then
+        bESPLbl.Text="ESP Frutas: ON"
+        bESP._ativo=true
+        bESP.BackgroundColor3=Color3.fromRGB(30,120,40)
+        task.spawn(function()
+            while _G.espFruits do
+                for _,h in ipairs(espPasta:GetChildren())do h:Destroy() end
+                for _,o in ipairs(workspace:GetDescendants())do
+                    if o:IsA("Model")and o:FindFirstChild("Handle")then
+                        local hn=o.Name:lower()
+                        for _,f in ipairs(fruitList)do
+                            if hn:find(f:lower(),1,true)then
+                                local hrp=o:FindFirstChild("Handle")
+                                if hrp then
+                                    local bb=Instance.new("BillboardGui",espPasta)
+                                    bb.Size=UDim2.new(0,120,0,30)
+                                    bb.StudsOffset=Vector3.new(0,2,0)
+                                    bb.AlwaysOnTop=true
+                                    bb.Adornee=hrp
+                                    local lbl=Instance.new("TextLabel",bb)
+                                    lbl.Size=UDim2.new(1,0,1,0)
+                                    lbl.BackgroundTransparency=1
+                                    lbl.Text=f
+                                    lbl.TextColor3=C.accent2
+                                    lbl.Font=Enum.Font.GothamBlack
+                                    lbl.TextSize=12
+                                    lbl.TextStrokeTransparency=0
+                                end
+                                break
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+            for _,h in ipairs(espPasta:GetChildren())do h:Destroy() end
+        end)
+    else
+        bESPLbl.Text="ESP Frutas: OFF"
+        bESP._ativo=false
+        bESP.BackgroundColor3=C.element
+        for _,h in ipairs(espPasta:GetChildren())do h:Destroy() end
+    end
+end)
+
+print("[GravityHub] Parte 7 OK — Fruit + ESP")
+
+
+
+local bCDK,bCDKLbl=criarBotao(pgWeapons,"🗡️","Auto CDK (Cursed Dual Katana): OFF",40,function()
+    _G.autoCDK=not _G.autoCDK
+    if _G.autoCDK then
+        bCDKLbl.Text="Auto CDK: ON"
+        bCDK._ativo=true
+        bCDK.BackgroundColor3=Color3.fromRGB(30,120,40)
+        task.spawn(function()
+            while _G.autoCDK do
+                stWeapons.Text="CDK | Farmando Cursed Ship..."
+                local c=plr.Character
+                if c and c:FindFirstChild("HumanoidRootPart")then
+                    flyTo(Vector3.new(-9432,50,-5800),275,70)
+                    local alvo=findEnemy("Cursed")or findEnemy("Living")
+                    if alvo then
+                        local h=alvo:FindFirstChild("HumanoidRootPart")
+                        if h then
+                            flyTo(h.Position+Vector3.new(0,10,0),275,30)
+                            equipStyle()
+                            for _=1,5 do attack(alvo) task.wait(0.05) end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    else
+        bCDKLbl.Text="Auto CDK: OFF"
+        bCDK._ativo=false
+        bCDK.BackgroundColor3=C.element
+    end
+end)
+
+local bTTK,bTTKLbl=criarBotao(pgWeapons,"⚔️","Auto TTK (True Triple Katana): OFF",90,function()
+    _G.autoTTK=not _G.autoTTK
+    if _G.autoTTK then
+        bTTKLbl.Text="Auto TTK: ON"
+        bTTK._ativo=true
+        bTTK.BackgroundColor3=Color3.fromRGB(30,120,40)
+        task.spawn(function()
+            while _G.autoTTK do
+                stWeapons.Text="TTK | Farmando Sword Dealer..."
+                local c=plr.Character
+                if c and c:FindFirstChild("HumanoidRootPart")then
+                    flyTo(Vector3.new(-1240,10,-1180),275,70)
+                    equipStyle()
+                    task.wait(0.3)
+                end
+                task.wait(0.5)
+            end
+        end)
+    else
+        bTTKLbl.Text="Auto TTK: OFF"
+        bTTK._ativo=false
+        bTTK.BackgroundColor3=C.element
+    end
+end)
+
+local bSoul,bSoulLbl=criarBotao(pgWeapons,"🎸","Auto Soul Guitar: OFF",140,function()
+    _G.autoSoul=not _G.autoSoul
+    if _G.autoSoul then
+        bSoulLbl.Text="Auto Soul Guitar: ON"
+        bSoul._ativo=true
+        bSoul.BackgroundColor3=Color3.fromRGB(30,120,40)
+        task.spawn(function()
+            while _G.autoSoul do
+                stWeapons.Text="Soul Guitar | Farmando Living Zombie..."
+                local c=plr.Character
+                if c and c:FindFirstChild("HumanoidRootPart")then
+                    flyTo(Vector3.new(-9524,142,-5892),275,70)
+                    local alvo=findEnemy("Living Zombie")or findEnemy("Reborn")
+                    if alvo then
+                        local h=alvo:FindFirstChild("HumanoidRootPart")
+                        if h then
+                            flyTo(h.Position+Vector3.new(0,10,0),275,30)
+                            equipStyle()
+                            for _=1,5 do attack(alvo) task.wait(0.05) end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    else
+        bSoulLbl.Text="Auto Soul Guitar: OFF"
+        bSoul._ativo=false
+        bSoul.BackgroundColor3=C.element
+    end
+end)
+
+local stWeapons=criarStatusBox(pgWeapons,190,"STATUS WEAPONS",70)
+
+print("[GravityHub] Parte 8 OK — CDK / TTK / Soul")
+
+
+-- Códigos (movido pra cá)
+local CODIGOS={
+"EASTEREXP","LIGHTNINGABUSE","1LOSTADMIN","ADMINFIGHT",
+"kittgaming","KITT_RESET","DRAGONABUSE","Sub2CaptainMaui",
+"CHANDLER","CODE_SERVICIO","DEVSCOOKING","Sub2Fer999",
+"Enyu_is_Pro","Magicbus","JCWK","Starcodeheo",
+"Bluxxy","fudd10_v2","SUB2GAMERROBOT_EXP1","THEGREATACE",
+"Axiore","TantaiGaming","Fudd10","STRAWHATMAINE",
+"BIGNEWS","SUB2UNCLEEKIZARU","SUB2NOOBMASTER123","Sub2Daigrock",
+"fudd10","KITTGAMING","FruitFiesta","BloxFruits2024"}
+
+local bRedeem,bRedeemLbl=criarBotao(pgRaid,"🎁","Resgatar Todos os Codigos",220,function()
+    local rem=RS:FindFirstChild("Remotes")
+    if rem then rem=rem:FindFirstChild("Redeem")end
+    if not rem then
+        stRaid.Text="Redeem remote nao encontrado"
+        return
+    end
+    stRaid.Text="Iniciando "..#CODIGOS.." codigos..."
+    local ok=0
+    for i,cod in ipairs(CODIGOS)do
+        pcall(function() rem:InvokeServer(cod) end)
+        ok=ok+1
+        stRaid.Text="Resgatando "..cod.." ("..i.."/"..#CODIGOS..")"
+        task.wait(0.35)
+    end
+    stRaid.Text="Resgate completo! "..ok.."/"..#CODIGOS
+end)
+
+print("[GravityHub] Parte 9 OK — Códigos")
+
+
+-- Eventos dos botões de janela
+hideBtn.MouseEnter:Connect(function()
+    TweenService:Create(hideBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(100,80,140)}):Play()
+end)
+hideBtn.MouseLeave:Connect(function()
+    TweenService:Create(hideBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(70,60,100)}):Play()
+end)
+hideBtn.MouseButton1Click:Connect(function()
+    win.Visible=not win.Visible
+end)
+
+minBtn.MouseEnter:Connect(function()
+    TweenService:Create(minBtn,TweenInfo.new(0.15),{BackgroundColor3=C.accent}):Play()
+end)
+minBtn.MouseLeave:Connect(function()
+    TweenService:Create(minBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(45,45,65)}):Play()
+end)
+
+cb_MouseEnter=cb_MouseEnter or function() end
+closeBtn.MouseEnter:Connect(function()
+    TweenService:Create(closeBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(255,110,130)}):Play()
+end)
+closeBtn.MouseLeave:Connect(function()
+    TweenService:Create(closeBtn,TweenInfo.new(0.15),{BackgroundColor3=C.red}):Play()
+end)
+
+local minimizado=false
+minBtn.MouseButton1Click:Connect(function()
+    minimizado=not minimizado
+    if minimizado then
+        TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,600,0,46)}):Play()
+        sidebar.Visible=false
+        content.Visible=false
+        credits.Visible=false
+        minBtn.Text="+"
+    else
+        TweenService:Create(win,TweenInfo.new(0.3),{Size=UDim2.new(0,600,0,440)}):Play()
+        sidebar.Visible=true
+        content.Visible=true
+        credits.Visible=true
+        minBtn.Text="-"
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    _G.autoFarm=false
+    _G.autoBoss=false
+    _G.autoRaid=false
+    _G.autoFruit=false
+    _G.autoCDK=false
+    _G.autoTTK=false
+    _G.autoSoul=false
+    sg:Destroy()
+end)
+
+-- Drag
+local dragging=false
+local dragStart,startPos
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+        dragging=true
+        dragStart=input.Position
+        startPos=win.Position
+        input.Changed:Connect(function()
+            if input.UserInputState==Enum.UserInputState.End then dragging=false end
+        end)
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch)then
+        local d=input.Position-dragStart
+        win.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+d.X,startPos.Y.Scale,startPos.Y.Offset+d.Y)
+    end
 end)
 
 mostrarAba("Main")
 
-print("=== Gravity Hub GrandGroup v2.0 OK ===")
+-- Atualiza lista de bosses a cada 10s
+task.spawn(function()
+    while sg.Parent do
+        if bossMenu.Visible then atualizarListaBoss() end
+        task.wait(10)
+    end
+end)
+
+print("===========================================")
+print("  GRAVITY HUB v3.0 — GrandGroup")
+print("  Sistema carregado com sucesso!")
+print("===========================================")
 
